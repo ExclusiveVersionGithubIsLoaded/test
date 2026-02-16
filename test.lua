@@ -1,116 +1,146 @@
 --[[
     ╔═══════════════════════════════════════════════════════════════════╗
-    ║                         PEPSI UI LIBRARY                          ║
-    ║                  Professional Roblox UI System                    ║
-    ║                      Black & White Edition                        ║
-    ║                         Version 2.1.0                             ║
+    ║                    PEPSI UI LIBRARY v3.0                          ║
+    ║                   DragWare Professional Style                     ║
+    ║                     Full Production Build                         ║
     ╚═══════════════════════════════════════════════════════════════════╝
     
-    ИСПРАВЛЕНИЯ v2.1.0:
-    ✅ Элементы сдвигаются вниз при открытии dropdown/colorpicker
-    ✅ Скругленные углы почти везде
-    ✅ Улучшенные уведомления с анимацией
-    ✅ Красивый toggle с анимацией
-    ✅ Круглые хендлы слайдеров
-    ✅ Улучшенные кнопки без заслонения текста
-    ✅ Красивые вкладки
-    ✅ Сворачивание окна (-)
-    ✅ Улучшенный ColorPicker
-    3000+ строк кода
+    FEATURES:
+    ✓ Watermark with live stats (top)
+    ✓ KeyBinds panel (right side)
+    ✓ Horizontal tabs (Combat, Visuals, Misc)
+    ✓ Background image support
+    ✓ Dropdown/ColorPicker with Z-Index 1500+ (always on top)
+    ✓ Column-based sections (left/right)
+    ✓ All components: Toggle, Slider, Dropdown, Keybind, ColorPicker, TextBox
+    ✓ Professional strict design
+    ✓ 3000+ lines of production code
 ]]
 
 local PepsiUI = {}
 PepsiUI.__index = PepsiUI
-PepsiUI.Version = "2.1.0"
+PepsiUI.Version = "3.0.0"
+
+-- Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Stats = game:GetService("Stats")
 
 -- ============================================
--- CORE SYSTEM CONFIGURATION
+-- CONFIGURATION SYSTEM
 -- ============================================
 local CONFIG = {
-    -- Color System
+    -- Color Palette (Strict Dark Theme)
     Colors = {
-        Black = Color3.fromRGB(0, 0, 0),
-        Gray900 = Color3.fromRGB(10, 10, 10),
-        Gray800 = Color3.fromRGB(26, 26, 26),
-        Gray750 = Color3.fromRGB(35, 35, 35),
-        Gray700 = Color3.fromRGB(42, 42, 42),
-        Gray600 = Color3.fromRGB(58, 58, 58),
-        Gray500 = Color3.fromRGB(90, 90, 90),
-        Gray400 = Color3.fromRGB(122, 122, 122),
-        Gray300 = Color3.fromRGB(154, 154, 154),
-        Gray200 = Color3.fromRGB(192, 192, 192),
-        Gray100 = Color3.fromRGB(224, 224, 224),
-        White = Color3.fromRGB(255, 255, 255),
+        -- Backgrounds
+        Background = Color3.fromRGB(18, 18, 18),
+        BackgroundLight = Color3.fromRGB(22, 22, 22),
+        Sidebar = Color3.fromRGB(14, 14, 14),
+        Header = Color3.fromRGB(20, 20, 20),
+        
+        -- Accents
+        Accent = Color3.fromRGB(138, 43, 226), -- Purple
+        AccentDark = Color3.fromRGB(110, 30, 200),
+        AccentLight = Color3.fromRGB(150, 60, 230),
+        
+        -- Text
+        Text = Color3.fromRGB(255, 255, 255),
+        TextDark = Color3.fromRGB(170, 170, 170),
+        TextDimmed = Color3.fromRGB(120, 120, 120),
+        
+        -- States
+        Border = Color3.fromRGB(35, 35, 35),
+        BorderLight = Color3.fromRGB(45, 45, 45),
+        Hover = Color3.fromRGB(28, 28, 28),
+        Active = Color3.fromRGB(32, 32, 32),
+        
+        -- Status
+        Success = Color3.fromRGB(80, 200, 120),
+        Warning = Color3.fromRGB(255, 200, 80),
+        Error = Color3.fromRGB(220, 80, 80),
+        Info = Color3.fromRGB(80, 160, 220),
     },
     
     -- Typography
     Fonts = {
-        Display = Enum.Font.GothamBold,
+        Main = Enum.Font.Code,
+        Bold = Enum.Font.CodeBold,
         Mono = Enum.Font.RobotoMono,
-        Body = Enum.Font.Gotham,
     },
     
     FontSizes = {
-        XS = 10,
-        SM = 12,
-        Base = 14,
-        LG = 16,
-        XL = 18,
-        XXL = 22,
-        XXXL = 28,
-        XXXXL = 36,
+        Tiny = 9,
+        Small = 11,
+        Medium = 13,
+        Large = 15,
+        XLarge = 17,
     },
     
-    -- Spacing System
+    -- Spacing & Layout
     Spacing = {
-        XS = 4,
-        SM = 8,
-        MD = 12,
-        LG = 16,
-        XL = 20,
-        XXL = 24,
-        XXXL = 32,
-        XXXXL = 48,
+        Tiny = 2,
+        Small = 4,
+        Medium = 6,
+        Large = 8,
+        XLarge = 12,
     },
     
-    -- Border & Corners
-    BorderWidth = 2,
+    -- Border Radius
     CornerRadius = {
         None = 0,
-        SM = 4,
-        MD = 8,
-        LG = 12,
-        XL = 16,
-        Full = 999,
+        Small = 2,
+        Medium = 4,
+        Large = 6,
     },
     
     -- Animation
-    TweenTime = 0.25,
-    TweenStyle = Enum.EasingStyle.Quad,
-    TweenDirection = Enum.EasingDirection.Out,
+    Animation = {
+        Fast = 0.1,
+        Normal = 0.2,
+        Slow = 0.3,
+        VerySlow = 0.5,
+    },
     
     -- Z-Index Layers
     ZIndex = {
+        Background = 0,
         Base = 1,
-        Dropdown = 100,
-        Modal = 200,
-        Tooltip = 300,
-        Notification = 400,
+        Content = 50,
+        Header = 100,
+        Overlay = 500,
+        Dropdown = 1500,
+        Modal = 2000,
+        Tooltip = 2500,
+    },
+    
+    -- Component Sizes
+    Sizes = {
+        WatermarkHeight = 20,
+        HeaderHeight = 30,
+        TabHeight = 30,
+        SectionPadding = 6,
+        ComponentHeight = 18,
+        SliderHeight = 32,
+        DropdownHeight = 36,
+        ColorPickerSize = 250,
     },
 }
 
 -- ============================================
 -- UTILITY FUNCTIONS
 -- ============================================
-local Utils = {}
+local Utility = {}
 
-function Utils.CreateInstance(className, properties)
+function Utility.Create(className, properties)
     local instance = Instance.new(className)
-    for prop, value in pairs(properties) do
-        if prop == "Parent" then
-            continue
+    for property, value in pairs(properties) do
+        if property ~= "Parent" then
+            pcall(function()
+                instance[property] = value
+            end)
         end
-        instance[prop] = value
     end
     if properties.Parent then
         instance.Parent = properties.Parent
@@ -118,932 +148,1233 @@ function Utils.CreateInstance(className, properties)
     return instance
 end
 
-function Utils.Tween(instance, properties, time, style, direction)
-    local tweenInfo = TweenInfo.new(
-        time or CONFIG.TweenTime,
-        style or CONFIG.TweenStyle,
-        direction or CONFIG.TweenDirection
-    )
-    local tween = game:GetService("TweenService"):Create(instance, tweenInfo, properties)
+function Utility.Tween(instance, properties, duration, easingStyle, easingDirection)
+    duration = duration or CONFIG.Animation.Normal
+    easingStyle = easingStyle or Enum.EasingStyle.Quad
+    easingDirection = easingDirection or Enum.EasingDirection.Out
+    
+    local tweenInfo = TweenInfo.new(duration, easingStyle, easingDirection)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
     tween:Play()
     return tween
 end
 
-function Utils.AddCorner(parent, radius)
-    return Utils.CreateInstance("UICorner", {
-        CornerRadius = UDim.new(0, radius or CONFIG.CornerRadius.MD),
+function Utility.AddCorner(parent, radius)
+    radius = radius or CONFIG.CornerRadius.Medium
+    return Utility.Create("UICorner", {
+        CornerRadius = UDim.new(0, radius),
         Parent = parent,
     })
 end
 
-function Utils.AddStroke(parent, color, thickness)
-    return Utils.CreateInstance("UIStroke", {
-        Color = color or CONFIG.Colors.White,
-        Thickness = thickness or CONFIG.BorderWidth,
+function Utility.AddStroke(parent, color, thickness)
+    color = color or CONFIG.Colors.Border
+    thickness = thickness or 1
+    return Utility.Create("UIStroke", {
+        Color = color,
+        Thickness = thickness,
         ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
         Parent = parent,
     })
 end
 
-function Utils.AddPadding(parent, all)
-    return Utils.CreateInstance("UIPadding", {
-        PaddingTop = UDim.new(0, all or CONFIG.Spacing.MD),
-        PaddingBottom = UDim.new(0, all or CONFIG.Spacing.MD),
-        PaddingLeft = UDim.new(0, all or CONFIG.Spacing.MD),
-        PaddingRight = UDim.new(0, all or CONFIG.Spacing.MD),
+function Utility.AddPadding(parent, padding)
+    local p = padding or CONFIG.Spacing.Medium
+    return Utility.Create("UIPadding", {
+        PaddingTop = UDim.new(0, p),
+        PaddingBottom = UDim.new(0, p),
+        PaddingLeft = UDim.new(0, p),
+        PaddingRight = UDim.new(0, p),
         Parent = parent,
     })
 end
 
-function Utils.AddListLayout(parent, padding, direction)
-    return Utils.CreateInstance("UIListLayout", {
-        Padding = UDim.new(0, padding or CONFIG.Spacing.SM),
-        FillDirection = direction or Enum.FillDirection.Vertical,
+function Utility.AddListLayout(parent, padding, direction, horizontalAlign, verticalAlign)
+    padding = padding or CONFIG.Spacing.Small
+    direction = direction or Enum.FillDirection.Vertical
+    
+    return Utility.Create("UIListLayout", {
+        Padding = UDim.new(0, padding),
+        FillDirection = direction,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        HorizontalAlignment = horizontalAlign or Enum.HorizontalAlignment.Left,
+        VerticalAlignment = verticalAlign or Enum.VerticalAlignment.Top,
+        Parent = parent,
+    })
+end
+
+function Utility.AddGridLayout(parent, cellSize, padding)
+    cellSize = cellSize or UDim2.new(0, 100, 0, 100)
+    padding = padding or UDim2.new(0, CONFIG.Spacing.Small, 0, CONFIG.Spacing.Small)
+    
+    return Utility.Create("UIGridLayout", {
+        CellSize = cellSize,
+        CellPadding = padding,
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = parent,
     })
 end
 
-function Utils.ApplyTextProperties(textLabel, config)
-    textLabel.Font = config.Font or CONFIG.Fonts.Body
-    textLabel.TextSize = config.Size or CONFIG.FontSizes.Base
-    textLabel.TextColor3 = config.Color or CONFIG.Colors.White
-    textLabel.TextXAlignment = config.XAlign or Enum.TextXAlignment.Left
-    textLabel.TextYAlignment = config.YAlign or Enum.TextYAlignment.Center
-    textLabel.TextWrapped = config.Wrapped or false
-end
-
--- Функция для расчета и сдвига элементов при открытии dropdown/colorpicker
-function Utils.ShiftElementsBelow(element, expandedHeight, restore)
-    local parent = element.Parent
-    if not parent then return end
-    
-    local elementPosition = element.AbsolutePosition.Y
-    local shouldShift = false
-    
-    for _, sibling in pairs(parent:GetChildren()) do
-        if sibling:IsA("GuiObject") and sibling ~= element then
-            if sibling.AbsolutePosition.Y > elementPosition then
-                local currentOffset = sibling:FindFirstChild("_ShiftOffset")
-                
-                if restore then
-                    -- Восстанавливаем позицию
-                    if currentOffset then
-                        local targetPos = sibling.Position - UDim2.new(0, 0, 0, currentOffset.Value)
-                        Utils.Tween(sibling, {Position = targetPos}, 0.3)
-                        currentOffset:Destroy()
-                    end
-                else
-                    -- Сдвигаем вниз
-                    if not currentOffset then
-                        currentOffset = Instance.new("NumberValue")
-                        currentOffset.Name = "_ShiftOffset"
-                        currentOffset.Value = expandedHeight
-                        currentOffset.Parent = sibling
-                        
-                        local targetPos = sibling.Position + UDim2.new(0, 0, 0, expandedHeight)
-                        Utils.Tween(sibling, {Position = targetPos}, 0.3)
-                    end
-                end
-            end
-        end
-    end
-    
-    -- Обновляем CanvasSize для ScrollingFrame
-    if parent:IsA("ScrollingFrame") then
-        task.wait(0.35)
-        local contentSize = parent.UIListLayout and parent.UIListLayout.AbsoluteContentSize.Y or 0
-        parent.CanvasSize = UDim2.new(0, 0, 0, contentSize + (restore and 0 or expandedHeight))
-    end
-end
-
--- ============================================
--- MAIN UI CLASS
--- ============================================
-function PepsiUI.new(parent)
-    local self = setmetatable({}, PepsiUI)
-    
-    self.Parent = parent or game:GetService("CoreGui")
-    self.Components = {}
-    self.Windows = {}
-    self.ActiveDropdowns = {}
-    
-    -- Create main screen GUI
-    self.ScreenGui = Utils.CreateInstance("ScreenGui", {
-        Name = "PepsiUI",
-        ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-        Parent = self.Parent,
-    })
-    
-    -- Setup input handler for closing dropdowns
-    self:SetupGlobalInputHandler()
-    
-    return self
-end
-
-function PepsiUI:SetupGlobalInputHandler()
-    local UserInputService = game:GetService("UserInputService")
-    
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            -- Close all active dropdowns
-            for _, dropdown in pairs(self.ActiveDropdowns) do
-                if dropdown and dropdown.Close then
-                    dropdown:Close()
-                end
-            end
-        end
-    end)
-end
-
--- ============================================
--- WINDOW COMPONENT
--- ============================================
-function PepsiUI:CreateWindow(config)
-    config = config or {}
-    
-    local window = {
-        Title = config.Title or "Pepsi UI Window",
-        Size = config.Size or UDim2.new(0, 600, 0, 500),
-        Position = config.Position or UDim2.new(0.5, -300, 0.5, -250),
-        Draggable = config.Draggable ~= false,
-        Tabs = {},
-        CurrentTab = nil,
-        Minimized = false,
-    }
-    
-    -- Main window frame
-    window.Frame = Utils.CreateInstance("Frame", {
-        Name = "Window",
-        Size = window.Size,
-        Position = window.Position,
-        BackgroundColor3 = CONFIG.Colors.Gray800,
-        BorderSizePixel = 0,
-        ClipsDescendants = true,
-        ZIndex = CONFIG.ZIndex.Base,
-        Parent = self.ScreenGui,
-    })
-    
-    Utils.AddStroke(window.Frame, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(window.Frame, CONFIG.CornerRadius.LG)
-    
-    -- Header
-    window.Header = Utils.CreateInstance("Frame", {
-        Name = "Header",
-        Size = UDim2.new(1, 0, 0, 50),
-        BackgroundColor3 = CONFIG.Colors.Black,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 1,
-        Parent = window.Frame,
-    })
-    
-    Utils.AddStroke(window.Header, CONFIG.Colors.Gray700, CONFIG.BorderWidth)
-    Utils.AddCorner(window.Header, CONFIG.CornerRadius.LG)
-    
-    -- Title
-    window.TitleLabel = Utils.CreateInstance("TextLabel", {
-        Name = "Title",
-        Size = UDim2.new(1, -120, 1, 0),
-        Position = UDim2.new(0, 20, 0, 0),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Display,
-        TextSize = CONFIG.FontSizes.XL,
-        TextColor3 = CONFIG.Colors.White,
-        Text = window.Title,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 2,
-        Parent = window.Header,
-    })
-    
-    -- Minimize button
-    window.MinimizeButton = Utils.CreateInstance("TextButton", {
-        Name = "MinimizeButton",
-        Size = UDim2.new(0, 36, 0, 36),
-        Position = UDim2.new(1, -90, 0, 7),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        Font = CONFIG.Fonts.Display,
-        TextSize = CONFIG.FontSizes.XXL,
-        TextColor3 = CONFIG.Colors.White,
-        Text = "−",
-        ZIndex = CONFIG.ZIndex.Base + 2,
-        Parent = window.Header,
-    })
-    
-    Utils.AddStroke(window.MinimizeButton, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(window.MinimizeButton, CONFIG.CornerRadius.MD)
-    
-    -- Close button
-    window.CloseButton = Utils.CreateInstance("TextButton", {
-        Name = "CloseButton",
-        Size = UDim2.new(0, 36, 0, 36),
-        Position = UDim2.new(1, -45, 0, 7),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        Font = CONFIG.Fonts.Display,
-        TextSize = CONFIG.FontSizes.XXL,
-        TextColor3 = CONFIG.Colors.White,
-        Text = "×",
-        ZIndex = CONFIG.ZIndex.Base + 2,
-        Parent = window.Header,
-    })
-    
-    Utils.AddStroke(window.CloseButton, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(window.CloseButton, CONFIG.CornerRadius.MD)
-    
-    window.CloseButton.MouseButton1Click:Connect(function()
-        window.Frame:Destroy()
-    end)
-    
-    window.CloseButton.MouseEnter:Connect(function()
-        Utils.Tween(window.CloseButton, {BackgroundColor3 = CONFIG.Colors.White}, 0.2)
-        Utils.Tween(window.CloseButton, {TextColor3 = CONFIG.Colors.Black}, 0.2)
-    end)
-    
-    window.CloseButton.MouseLeave:Connect(function()
-        Utils.Tween(window.CloseButton, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-        Utils.Tween(window.CloseButton, {TextColor3 = CONFIG.Colors.White}, 0.2)
-    end)
-    
-    -- Minimize functionality
-    window.MinimizeButton.MouseButton1Click:Connect(function()
-        window.Minimized = not window.Minimized
-        
-        if window.Minimized then
-            window.MinimizeButton.Text = "+"
-            Utils.Tween(window.Frame, {Size = UDim2.new(window.Size.X.Scale, window.Size.X.Offset, 0, 50)}, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        else
-            window.MinimizeButton.Text = "−"
-            Utils.Tween(window.Frame, {Size = window.Size}, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        end
-    end)
-    
-    window.MinimizeButton.MouseEnter:Connect(function()
-        Utils.Tween(window.MinimizeButton, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
-    end)
-    
-    window.MinimizeButton.MouseLeave:Connect(function()
-        Utils.Tween(window.MinimizeButton, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-    end)
-    
-    -- Tab container
-    window.TabContainer = Utils.CreateInstance("Frame", {
-        Name = "TabContainer",
-        Size = UDim2.new(0, 150, 1, -50),
-        Position = UDim2.new(0, 0, 0, 50),
-        BackgroundColor3 = CONFIG.Colors.Black,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 1,
-        Parent = window.Frame,
-    })
-    
-    Utils.AddStroke(window.TabContainer, CONFIG.Colors.Gray700, CONFIG.BorderWidth)
-    Utils.AddListLayout(window.TabContainer, 2, Enum.FillDirection.Vertical)
-    
-    -- Content area
-    window.ContentArea = Utils.CreateInstance("Frame", {
-        Name = "ContentArea",
-        Size = UDim2.new(1, -150, 1, -50),
-        Position = UDim2.new(0, 150, 0, 50),
-        BackgroundColor3 = CONFIG.Colors.Gray900,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base,
-        Parent = window.Frame,
-    })
-    
-    -- Dragging functionality
-    if window.Draggable then
-        local dragging = false
-        local dragStart = nil
-        local startPos = nil
-        
-        window.Header.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                dragStart = input.Position
-                startPos = window.Frame.Position
-            end
-        end)
-        
-        window.Header.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-        
-        game:GetService("UserInputService").InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                local delta = input.Position - dragStart
-                window.Frame.Position = UDim2.new(
-                    startPos.X.Scale,
-                    startPos.X.Offset + delta.X,
-                    startPos.Y.Scale,
-                    startPos.Y.Offset + delta.Y
-                )
-            end
-        end)
-    end
-    
-    -- Window methods
-    function window:CreateTab(name)
-        local tab = {
-            Name = name,
-            Sections = {},
-            Window = self,
-        }
-        
-        -- Tab button с улучшенным дизайном
-        tab.Button = Utils.CreateInstance("TextButton", {
-            Name = "TabButton_" .. name,
-            Size = UDim2.new(1, 0, 0, 45),
-            BackgroundColor3 = CONFIG.Colors.Gray800,
-            BorderSizePixel = 0,
-            Font = CONFIG.Fonts.Mono,
-            TextSize = CONFIG.FontSizes.Base,
-            TextColor3 = CONFIG.Colors.Gray400,
-            Text = name:upper(),
-            ZIndex = CONFIG.ZIndex.Base + 2,
-            Parent = self.TabContainer,
-        })
-        
-        Utils.AddCorner(tab.Button, CONFIG.CornerRadius.SM)
-        local stroke = Utils.AddStroke(tab.Button, CONFIG.Colors.Gray700, 1)
-        
-        -- Indicator bar для активной вкладки
-        tab.Indicator = Utils.CreateInstance("Frame", {
-            Name = "Indicator",
-            Size = UDim2.new(0, 4, 1, 0),
-            Position = UDim2.new(0, 0, 0, 0),
-            BackgroundColor3 = CONFIG.Colors.White,
-            BorderSizePixel = 0,
-            Visible = false,
-            ZIndex = CONFIG.ZIndex.Base + 3,
-            Parent = tab.Button,
-        })
-        
-        Utils.AddCorner(tab.Indicator, CONFIG.CornerRadius.SM)
-        
-        -- Tab content
-        tab.Content = Utils.CreateInstance("ScrollingFrame", {
-            Name = "TabContent_" .. name,
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            ScrollBarThickness = 8,
-            ScrollBarImageColor3 = CONFIG.Colors.White,
-            Visible = false,
-            ZIndex = CONFIG.ZIndex.Base + 1,
-            Parent = self.ContentArea,
-        })
-        
-        Utils.AddPadding(tab.Content, CONFIG.Spacing.LG)
-        Utils.AddListLayout(tab.Content, CONFIG.Spacing.LG, Enum.FillDirection.Vertical)
-        
-        -- Tab activation
-        tab.Button.MouseButton1Click:Connect(function()
-            self:ActivateTab(tab)
-        end)
-        
-        tab.Button.MouseEnter:Connect(function()
-            if self.CurrentTab ~= tab then
-                Utils.Tween(tab.Button, {BackgroundColor3 = CONFIG.Colors.Gray750}, 0.2)
-            end
-        end)
-        
-        tab.Button.MouseLeave:Connect(function()
-            if self.CurrentTab ~= tab then
-                Utils.Tween(tab.Button, {BackgroundColor3 = CONFIG.Colors.Gray800}, 0.2)
-            end
-        end)
-        
-        -- Section creation
-        function tab:CreateSection(sectionName)
-            local section = {
-                Name = sectionName,
-                Elements = {},
-            }
-            
-            section.Frame = Utils.CreateInstance("Frame", {
-                Name = "Section_" .. sectionName,
-                Size = UDim2.new(1, 0, 0, 0),
-                AutomaticSize = Enum.AutomaticSize.Y,
-                BackgroundColor3 = CONFIG.Colors.Gray800,
-                BorderSizePixel = 0,
-                ZIndex = CONFIG.ZIndex.Base + 2,
-                Parent = tab.Content,
-            })
-            
-            Utils.AddStroke(section.Frame, CONFIG.Colors.Gray700, CONFIG.BorderWidth)
-            Utils.AddCorner(section.Frame, CONFIG.CornerRadius.LG)
-            Utils.AddPadding(section.Frame, CONFIG.Spacing.LG)
-            Utils.AddListLayout(section.Frame, CONFIG.Spacing.MD, Enum.FillDirection.Vertical)
-            
-            section.Title = Utils.CreateInstance("TextLabel", {
-                Name = "SectionTitle",
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundTransparency = 1,
-                Font = CONFIG.Fonts.Display,
-                TextSize = CONFIG.FontSizes.LG,
-                TextColor3 = CONFIG.Colors.White,
-                Text = sectionName:upper(),
-                TextXAlignment = Enum.TextXAlignment.Left,
-                ZIndex = CONFIG.ZIndex.Base + 3,
-                Parent = section.Frame,
-            })
-            
-            table.insert(tab.Sections, section)
-            return section
-        end
-        
-        table.insert(self.Tabs, tab)
-        
-        -- Activate first tab
-        if #self.Tabs == 1 then
-            self:ActivateTab(tab)
-        end
-        
-        return tab
-    end
-    
-    function window:ActivateTab(tab)
-        -- Deactivate current tab
-        if self.CurrentTab then
-            self.CurrentTab.Content.Visible = false
-            self.CurrentTab.Indicator.Visible = false
-            Utils.Tween(self.CurrentTab.Button, {BackgroundColor3 = CONFIG.Colors.Gray800}, 0.2)
-            Utils.Tween(self.CurrentTab.Button, {TextColor3 = CONFIG.Colors.Gray400}, 0.2)
-        end
-        
-        -- Activate new tab
-        self.CurrentTab = tab
-        tab.Content.Visible = true
-        tab.Indicator.Visible = true
-        Utils.Tween(tab.Button, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-        Utils.Tween(tab.Button, {TextColor3 = CONFIG.Colors.White}, 0.2)
-    end
-    
-    table.insert(self.Windows, window)
-    return window
-end
-
--- ============================================
--- BUTTON COMPONENT (УЛУЧШЕННЫЙ)
--- ============================================
-function PepsiUI:CreateButton(parent, config)
-    config = config or {}
-    
-    local button = {
-        Text = config.Text or "Button",
-        Callback = config.Callback or function() end,
-    }
-    
-    button.Frame = Utils.CreateInstance("TextButton", {
-        Name = "Button",
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = CONFIG.Colors.White,
-        BorderSizePixel = 0,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.Black,
-        Text = button.Text:upper(),
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
-    
-    Utils.AddStroke(button.Frame, CONFIG.Colors.Black, CONFIG.BorderWidth)
-    Utils.AddCorner(button.Frame, CONFIG.CornerRadius.MD)
-    
-    button.Frame.MouseEnter:Connect(function()
-        Utils.Tween(button.Frame, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-        Utils.Tween(button.Frame, {TextColor3 = CONFIG.Colors.White}, 0.2)
-    end)
-    
-    button.Frame.MouseLeave:Connect(function()
-        Utils.Tween(button.Frame, {BackgroundColor3 = CONFIG.Colors.White}, 0.2)
-        Utils.Tween(button.Frame, {TextColor3 = CONFIG.Colors.Black}, 0.2)
-    end)
-    
-    button.Frame.MouseButton1Click:Connect(function()
-        button.Callback()
-        
-        -- Click animation
-        Utils.Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 38)}, 0.1)
-        task.wait(0.1)
-        Utils.Tween(button.Frame, {Size = UDim2.new(1, 0, 0, 40)}, 0.1)
-    end)
-    
-    return button
-end
-
--- ============================================
--- TOGGLE COMPONENT (КРАСИВЫЙ)
--- ============================================
-function PepsiUI:CreateToggle(parent, config)
-    config = config or {}
-    
-    local toggle = {
-        Text = config.Text or "Toggle",
-        Default = config.Default or false,
-        Callback = config.Callback or function() end,
-        Value = config.Default or false,
-    }
-    
-    toggle.Frame = Utils.CreateInstance("Frame", {
-        Name = "Toggle",
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
-    
-    Utils.AddStroke(toggle.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(toggle.Frame, CONFIG.CornerRadius.MD)
-    
-    toggle.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -70, 1, 0),
-        Position = UDim2.new(0, 15, 0, 0),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        Text = toggle.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = toggle.Frame,
-    })
-    
-    -- Toggle switch background (закругленный)
-    toggle.SwitchBg = Utils.CreateInstance("Frame", {
-        Name = "SwitchBg",
-        Size = UDim2.new(0, 50, 0, 26),
-        Position = UDim2.new(1, -60, 0.5, -13),
-        BackgroundColor3 = CONFIG.Colors.Gray600,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = toggle.Frame,
-    })
-    
-    Utils.AddStroke(toggle.SwitchBg, CONFIG.Colors.Gray500, CONFIG.BorderWidth)
-    Utils.AddCorner(toggle.SwitchBg, CONFIG.CornerRadius.Full)
-    
-    -- Toggle switch slider (круглый)
-    toggle.Switch = Utils.CreateInstance("Frame", {
-        Name = "Switch",
-        Size = UDim2.new(0, 18, 0, 18),
-        Position = UDim2.new(0, 4, 0.5, -9),
-        BackgroundColor3 = CONFIG.Colors.White,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 5,
-        Parent = toggle.SwitchBg,
-    })
-    
-    Utils.AddCorner(toggle.Switch, CONFIG.CornerRadius.Full)
-    
-    -- Button for clicking
-    toggle.Button = Utils.CreateInstance("TextButton", {
-        Name = "Button",
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = "",
-        ZIndex = CONFIG.ZIndex.Base + 6,
-        Parent = toggle.Frame,
-    })
-    
-    function toggle:Set(value)
-        self.Value = value
-        
-        if value then
-            -- ON состояние
-            Utils.Tween(self.Switch, {
-                Position = UDim2.new(1, -22, 0.5, -9),
-                BackgroundColor3 = CONFIG.Colors.White,
-                Size = UDim2.new(0, 18, 0, 18)
-            }, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-            Utils.Tween(self.SwitchBg, {BackgroundColor3 = CONFIG.Colors.Black}, 0.3)
-            
-            local stroke = self.SwitchBg:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                Utils.Tween(stroke, {Color = CONFIG.Colors.White}, 0.3)
-            end
-        else
-            -- OFF состояние
-            Utils.Tween(self.Switch, {
-                Position = UDim2.new(0, 4, 0.5, -9),
-                BackgroundColor3 = CONFIG.Colors.White,
-                Size = UDim2.new(0, 18, 0, 18)
-            }, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-            Utils.Tween(self.SwitchBg, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.3)
-            
-            local stroke = self.SwitchBg:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                Utils.Tween(stroke, {Color = CONFIG.Colors.Gray500}, 0.3)
-            end
-        end
-        
-        self.Callback(value)
-    end
-    
-    toggle.Button.MouseButton1Click:Connect(function()
-        -- Анимация нажатия
-        Utils.Tween(toggle.Switch, {Size = UDim2.new(0, 22, 0, 22)}, 0.1)
-        task.wait(0.1)
-        toggle:Set(not toggle.Value)
-    end)
-    
-    toggle.Frame.MouseEnter:Connect(function()
-        Utils.Tween(toggle.Frame, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
-    end)
-    
-    toggle.Frame.MouseLeave:Connect(function()
-        Utils.Tween(toggle.Frame, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-    end)
-    
-    -- Set initial state
-    toggle:Set(toggle.Default)
-    
-    return toggle
-end
-
--- ============================================
--- SLIDER COMPONENT (С КРУГЛЯШКАМИ)
--- ============================================
-function PepsiUI:CreateSlider(parent, config)
-    config = config or {}
-    
-    local slider = {
-        Text = config.Text or "Slider",
-        Min = config.Min or 0,
-        Max = config.Max or 100,
-        Default = config.Default or 50,
-        Increment = config.Increment or 1,
-        Callback = config.Callback or function() end,
-        Value = config.Default or 50,
-    }
-    
-    slider.Frame = Utils.CreateInstance("Frame", {
-        Name = "Slider",
-        Size = UDim2.new(1, 0, 0, 60),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
-    
-    Utils.AddStroke(slider.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(slider.Frame, CONFIG.CornerRadius.MD)
-    
-    -- Label and value
-    slider.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -30, 0, 20),
-        Position = UDim2.new(0, 15, 0, 8),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        Text = slider.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = slider.Frame,
-    })
-    
-    slider.ValueLabel = Utils.CreateInstance("TextLabel", {
-        Name = "ValueLabel",
-        Size = UDim2.new(0, 60, 0, 20),
-        Position = UDim2.new(1, -75, 0, 8),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.Gray300,
-        Text = tostring(slider.Value),
-        TextXAlignment = Enum.TextXAlignment.Right,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = slider.Frame,
-    })
-    
-    -- Slider bar background
-    slider.Bar = Utils.CreateInstance("Frame", {
-        Name = "Bar",
-        Size = UDim2.new(1, -30, 0, 8),
-        Position = UDim2.new(0, 15, 1, -20),
-        BackgroundColor3 = CONFIG.Colors.Gray600,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = slider.Frame,
-    })
-    
-    Utils.AddStroke(slider.Bar, CONFIG.Colors.Gray500, 1)
-    Utils.AddCorner(slider.Bar, CONFIG.CornerRadius.Full)
-    
-    -- Slider fill
-    slider.Fill = Utils.CreateInstance("Frame", {
-        Name = "Fill",
-        Size = UDim2.new(0.5, 0, 1, 0),
-        BackgroundColor3 = CONFIG.Colors.White,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 5,
-        Parent = slider.Bar,
-    })
-    
-    Utils.AddCorner(slider.Fill, CONFIG.CornerRadius.Full)
-    
-    -- Slider handle (КРУГЛЫЙ!)
-    slider.Handle = Utils.CreateInstance("Frame", {
-        Name = "Handle",
-        Size = UDim2.new(0, 20, 0, 20),
-        Position = UDim2.new(0.5, -10, 0.5, -10),
-        BackgroundColor3 = CONFIG.Colors.White,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 6,
-        Parent = slider.Bar,
-    })
-    
-    Utils.AddStroke(slider.Handle, CONFIG.Colors.Black, CONFIG.BorderWidth)
-    Utils.AddCorner(slider.Handle, CONFIG.CornerRadius.Full)
-    
-    -- Dragging functionality
+function Utility.MakeDraggable(frame, handle)
+    handle = handle or frame
     local dragging = false
+    local dragStart = nil
+    local startPos = nil
     
-    function slider:Set(value)
-        value = math.clamp(value, self.Min, self.Max)
-        value = math.floor(value / self.Increment + 0.5) * self.Increment
-        self.Value = value
-        
-        local percent = (value - self.Min) / (self.Max - self.Min)
-        
-        Utils.Tween(self.Fill, {Size = UDim2.new(percent, 0, 1, 0)}, 0.15)
-        Utils.Tween(self.Handle, {Position = UDim2.new(percent, -10, 0.5, -10)}, 0.15)
-        
-        self.ValueLabel.Text = tostring(value)
-        self.Callback(value)
-    end
-    
-    slider.Bar.InputBegan:Connect(function(input)
+    handle.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
         end
     end)
     
-    slider.Bar.InputEnded:Connect(function(input)
+    handle.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
     
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = game:GetService("UserInputService"):GetMouseLocation()
-            local barPos = slider.Bar.AbsolutePosition
-            local barSize = slider.Bar.AbsoluteSize
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+function Utility.RGBToHex(color)
+    local r = math.floor(color.R * 255)
+    local g = math.floor(color.G * 255)
+    local b = math.floor(color.B * 255)
+    return string.format("#%02X%02X%02X", r, g, b)
+end
+
+function Utility.HexToRGB(hex)
+    hex = hex:gsub("#", "")
+    local r = tonumber("0x" .. hex:sub(1, 2)) / 255
+    local g = tonumber("0x" .. hex:sub(3, 4)) / 255
+    local b = tonumber("0x" .. hex:sub(5, 6)) / 255
+    return Color3.new(r, g, b)
+end
+
+-- ============================================
+-- MAIN UI CLASS
+-- ============================================
+function PepsiUI.new(title, config)
+    local self = setmetatable({}, PepsiUI)
+    
+    -- Properties
+    self.Title = title or "dragware"
+    self.Config = config or {}
+    self.Tabs = {}
+    self.ActiveTab = nil
+    self.ActiveDropdowns = {}
+    self.Keybinds = {}
+    self.Notifications = {}
+    
+    -- Create ScreenGui
+    self.ScreenGui = Utility.Create("ScreenGui", {
+        Name = "PepsiUI_" .. self.Title,
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        Parent = game:GetService("CoreGui"),
+    })
+    
+    -- Initialize Components
+    self:CreateBackground()
+    self:CreateWatermark()
+    self:CreateKeybindsPanel()
+    self:CreateMainWindow()
+    self:SetupInputHandlers()
+    self:StartUpdateLoop()
+    
+    return self
+end
+
+-- ============================================
+-- BACKGROUND SYSTEM
+-- ============================================
+function PepsiUI:CreateBackground()
+    self.BackgroundContainer = Utility.Create("Frame", {
+        Name = "BackgroundContainer",
+        Size = UDim2.new(1, 0, 1, 0),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Background,
+        Parent = self.ScreenGui,
+    })
+    
+    self.BackgroundImage = Utility.Create("ImageLabel", {
+        Name = "BackgroundImage",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Image = "",
+        ImageTransparency = 0.4,
+        ScaleType = Enum.ScaleType.Crop,
+        ZIndex = CONFIG.ZIndex.Background,
+        Parent = self.BackgroundContainer,
+    })
+    
+    -- Vignette Effect
+    self.Vignette = Utility.Create("ImageLabel", {
+        Name = "Vignette",
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://4576475446",
+        ImageColor3 = Color3.fromRGB(0, 0, 0),
+        ImageTransparency = 0.3,
+        ZIndex = CONFIG.ZIndex.Background + 1,
+        Parent = self.BackgroundContainer,
+    })
+end
+
+function PepsiUI:SetBackgroundImage(imageId)
+    if type(imageId) == "number" then
+        self.BackgroundImage.Image = "rbxassetid://" .. imageId
+    else
+        self.BackgroundImage.Image = imageId
+    end
+end
+
+function PepsiUI:SetBackgroundTransparency(transparency)
+    self.BackgroundImage.ImageTransparency = math.clamp(transparency, 0, 1)
+end
+
+-- ============================================
+-- WATERMARK COMPONENT
+-- ============================================
+function PepsiUI:CreateWatermark()
+    local watermark = Utility.Create("Frame", {
+        Name = "Watermark",
+        Size = UDim2.new(0, 450, 0, CONFIG.Sizes.WatermarkHeight),
+        Position = UDim2.new(0.5, -225, 0, 5),
+        BackgroundColor3 = CONFIG.Colors.Background,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Overlay,
+        Parent = self.ScreenGui,
+    })
+    
+    Utility.AddCorner(watermark, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(watermark, CONFIG.Colors.Border, 1)
+    
+    -- Accent Line
+    local accentLine = Utility.Create("Frame", {
+        Name = "AccentLine",
+        Size = UDim2.new(1, 0, 0, 1),
+        Position = UDim2.new(0, 0, 1, -1),
+        BackgroundColor3 = CONFIG.Colors.Accent,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Overlay + 1,
+        Parent = watermark,
+    })
+    
+    -- Text Label
+    self.WatermarkLabel = Utility.Create("TextLabel", {
+        Name = "WatermarkLabel",
+        Size = UDim2.new(1, -10, 1, 0),
+        Position = UDim2.new(0, 5, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = self.Title .. " | 0ms | 0fps | 0plr | 0mb",
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = CONFIG.ZIndex.Overlay + 2,
+        Parent = watermark,
+    })
+    
+    self.Watermark = watermark
+end
+
+function PepsiUI:UpdateWatermark()
+    local fps = math.floor(1 / RunService.RenderStepped:Wait())
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    local players = #Players:GetPlayers()
+    local memory = math.floor(Stats:GetTotalMemoryUsageMb())
+    
+    self.WatermarkLabel.Text = string.format(
+        "%s | %dms | %dfps | %dplr | %dmb",
+        self.Title, ping, fps, players, memory
+    )
+end
+
+-- ============================================
+-- KEYBINDS PANEL
+-- ============================================
+function PepsiUI:CreateKeybindsPanel()
+    local panel = Utility.Create("Frame", {
+        Name = "KeybindsPanel",
+        Size = UDim2.new(0, 180, 0, 25),
+        Position = UDim2.new(1, -190, 0.5, -100),
+        BackgroundColor3 = CONFIG.Colors.Background,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Overlay,
+        Parent = self.ScreenGui,
+    })
+    
+    Utility.AddCorner(panel, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(panel, CONFIG.Colors.Border, 1)
+    
+    -- Header
+    local header = Utility.Create("Frame", {
+        Name = "Header",
+        Size = UDim2.new(1, 0, 0, 20),
+        BackgroundColor3 = CONFIG.Colors.Header,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Overlay + 1,
+        Parent = panel,
+    })
+    
+    Utility.AddCorner(header, CONFIG.CornerRadius.Medium)
+    
+    -- Accent bar
+    local accentBar = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 1),
+        Position = UDim2.new(0, 0, 1, -1),
+        BackgroundColor3 = CONFIG.Colors.Accent,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Overlay + 2,
+        Parent = header,
+    })
+    
+    local title = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, -10, 1, 0),
+        Position = UDim2.new(0, 5, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = "keybinds",
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Overlay + 3,
+        Parent = header,
+    })
+    
+    -- Content
+    local content = Utility.Create("Frame", {
+        Name = "Content",
+        Size = UDim2.new(1, 0, 1, -20),
+        Position = UDim2.new(0, 0, 0, 20),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Overlay + 1,
+        Parent = panel,
+    })
+    
+    Utility.AddPadding(content, CONFIG.Spacing.Small)
+    
+    local listLayout = Utility.AddListLayout(content, 2)
+    
+    self.KeybindsPanel = panel
+    self.KeybindsContent = content
+    self.KeybindsListLayout = listLayout
+    
+    -- Auto-resize
+    listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        local height = listLayout.AbsoluteContentSize.Y + 25
+        Utility.Tween(panel, {Size = UDim2.new(0, 180, 0, height)}, CONFIG.Animation.Fast)
+    end)
+    
+    Utility.MakeDraggable(panel, header)
+end
+
+function PepsiUI:AddKeybindDisplay(name, key, enabled)
+    local id = "KB_" .. name:gsub("%s+", "_")
+    local existing = self.KeybindsContent:FindFirstChild(id)
+    
+    if enabled then
+        if not existing then
+            local container = Utility.Create("Frame", {
+                Name = id,
+                Size = UDim2.new(1, 0, 0, 16),
+                BackgroundTransparency = 1,
+                ZIndex = CONFIG.ZIndex.Overlay + 2,
+                Parent = self.KeybindsContent,
+            })
             
-            local relativeX = math.clamp(mousePos.X - barPos.X, 0, barSize.X)
-            local percent = relativeX / barSize.X
+            local nameLabel = Utility.Create("TextLabel", {
+                Size = UDim2.new(0.65, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Font = CONFIG.Fonts.Main,
+                TextSize = CONFIG.FontSizes.Small,
+                TextColor3 = CONFIG.Colors.Text,
+                Text = name,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd,
+                ZIndex = CONFIG.ZIndex.Overlay + 3,
+                Parent = container,
+            })
+            
+            local keyLabel = Utility.Create("TextLabel", {
+                Size = UDim2.new(0.35, 0, 1, 0),
+                Position = UDim2.new(0.65, 0, 0, 0),
+                BackgroundTransparency = 1,
+                Font = CONFIG.Fonts.Main,
+                TextSize = CONFIG.FontSizes.Small,
+                TextColor3 = CONFIG.Colors.TextDark,
+                Text = "[" .. key .. "]",
+                TextXAlignment = Enum.TextXAlignment.Right,
+                ZIndex = CONFIG.ZIndex.Overlay + 3,
+                Parent = container,
+            })
+            
+            -- Fade in animation
+            container.BackgroundTransparency = 1
+            nameLabel.TextTransparency = 1
+            keyLabel.TextTransparency = 1
+            
+            Utility.Tween(nameLabel, {TextTransparency = 0}, CONFIG.Animation.Normal)
+            Utility.Tween(keyLabel, {TextTransparency = 0}, CONFIG.Animation.Normal)
+        end
+    else
+        if existing then
+            -- Fade out animation
+            for _, child in ipairs(existing:GetChildren()) do
+                if child:IsA("TextLabel") then
+                    Utility.Tween(child, {TextTransparency = 1}, CONFIG.Animation.Normal)
+                end
+            end
+            task.wait(CONFIG.Animation.Normal)
+            existing:Destroy()
+        end
+    end
+end
+
+-- ============================================
+-- MAIN WINDOW
+-- ============================================
+function PepsiUI:CreateMainWindow()
+    local window = Utility.Create("Frame", {
+        Name = "MainWindow",
+        Size = UDim2.new(0, 650, 0, 450),
+        Position = UDim2.new(0.5, -325, 0.5, -225),
+        BackgroundColor3 = CONFIG.Colors.Background,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Base,
+        Parent = self.ScreenGui,
+    })
+    
+    Utility.AddCorner(window, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(window, CONFIG.Colors.Border, 1)
+    
+    -- Header
+    local header = Utility.Create("Frame", {
+        Name = "Header",
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.HeaderHeight),
+        BackgroundColor3 = CONFIG.Colors.Header,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Header,
+        Parent = window,
+    })
+    
+    Utility.AddCorner(header, CONFIG.CornerRadius.Medium)
+    
+    -- Accent line under header
+    local headerAccent = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 1),
+        Position = UDim2.new(0, 0, 1, -1),
+        BackgroundColor3 = CONFIG.Colors.Accent,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Header + 1,
+        Parent = header,
+    })
+    
+    -- Title
+    local titleLabel = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = CONFIG.FontSizes.Medium,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = self.Title,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ZIndex = CONFIG.ZIndex.Header + 2,
+        Parent = header,
+    })
+    
+    -- Tabs Container
+    local tabsContainer = Utility.Create("Frame", {
+        Name = "TabsContainer",
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.TabHeight),
+        Position = UDim2.new(0, 0, 0, CONFIG.Sizes.HeaderHeight),
+        BackgroundColor3 = CONFIG.Colors.Sidebar,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Base + 10,
+        Parent = window,
+    })
+    
+    Utility.AddListLayout(tabsContainer, 0, Enum.FillDirection.Horizontal)
+    
+    -- Tab underline (indicator)
+    self.TabIndicator = Utility.Create("Frame", {
+        Name = "TabIndicator",
+        Size = UDim2.new(0, 0, 0, 2),
+        Position = UDim2.new(0, 0, 1, -2),
+        BackgroundColor3 = CONFIG.Colors.Accent,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Base + 12,
+        Parent = tabsContainer,
+    })
+    
+    -- Content Container
+    local contentContainer = Utility.Create("Frame", {
+        Name = "ContentContainer",
+        Size = UDim2.new(1, 0, 1, -60),
+        Position = UDim2.new(0, 0, 0, 60),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ClipDescendants = true,
+        ZIndex = CONFIG.ZIndex.Content,
+        Parent = window,
+    })
+    
+    self.Window = window
+    self.Header = header
+    self.TabsContainer = tabsContainer
+    self.ContentContainer = contentContainer
+    
+    -- Make draggable
+    Utility.MakeDraggable(window, header)
+end
+
+-- ============================================
+-- TAB SYSTEM
+-- ============================================
+function PepsiUI:AddTab(name, icon)
+    local tab = {
+        Name = name,
+        Icon = icon or "",
+        Sections = {},
+        Active = false,
+        Elements = {},
+    }
+    
+    -- Calculate tab width
+    local tabCount = #self.Tabs + 1
+    local tabWidth = 650 / math.max(tabCount, 3)
+    
+    -- Tab Button
+    local button = Utility.Create("TextButton", {
+        Name = "Tab_" .. name,
+        Size = UDim2.new(0, tabWidth, 1, 0),
+        BackgroundColor3 = CONFIG.Colors.Sidebar,
+        BorderSizePixel = 0,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Medium,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = "",
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Base + 11,
+        Parent = self.TabsContainer,
+    })
+    
+    -- Icon + Text Container
+    local textContainer = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Base + 12,
+        Parent = button,
+    })
+    
+    if icon and icon ~= "" then
+        local iconLabel = Utility.Create("TextLabel", {
+            Size = UDim2.new(0, 18, 0, 18),
+            Position = UDim2.new(0.5, -50, 0.5, -9),
+            BackgroundTransparency = 1,
+            Font = CONFIG.Fonts.Bold,
+            TextSize = CONFIG.FontSizes.Medium,
+            TextColor3 = CONFIG.Colors.TextDark,
+            Text = icon,
+            ZIndex = CONFIG.ZIndex.Base + 13,
+            Parent = textContainer,
+        })
+        tab.IconLabel = iconLabel
+        
+        local textLabel = Utility.Create("TextLabel", {
+            Size = UDim2.new(0, 100, 1, 0),
+            Position = UDim2.new(0.5, -32, 0, 0),
+            BackgroundTransparency = 1,
+            Font = CONFIG.Fonts.Main,
+            TextSize = CONFIG.FontSizes.Medium,
+            TextColor3 = CONFIG.Colors.TextDark,
+            Text = string.upper(name),
+            TextXAlignment = Enum.TextXAlignment.Left,
+            ZIndex = CONFIG.ZIndex.Base + 13,
+            Parent = textContainer,
+        })
+        tab.TextLabel = textLabel
+    else
+        local textLabel = Utility.Create("TextLabel", {
+            Size = UDim2.new(1, 0, 1, 0),
+            BackgroundTransparency = 1,
+            Font = CONFIG.Fonts.Main,
+            TextSize = CONFIG.FontSizes.Medium,
+            TextColor3 = CONFIG.Colors.TextDark,
+            Text = string.upper(name),
+            ZIndex = CONFIG.ZIndex.Base + 13,
+            Parent = textContainer,
+        })
+        tab.TextLabel = textLabel
+    end
+    
+    -- Content ScrollFrame
+    local scrollFrame = Utility.Create("ScrollingFrame", {
+        Name = "TabContent_" .. name,
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = CONFIG.Colors.Border,
+        Visible = false,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        ZIndex = CONFIG.ZIndex.Content + 1,
+        Parent = self.ContentContainer,
+    })
+    
+    -- Two column layout
+    local leftColumn = Utility.Create("Frame", {
+        Name = "LeftColumn",
+        Size = UDim2.new(0.49, 0, 1, 0),
+        Position = UDim2.new(0, 8, 0, 0),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Content + 2,
+        Parent = scrollFrame,
+    })
+    
+    local rightColumn = Utility.Create("Frame", {
+        Name = "RightColumn",
+        Size = UDim2.new(0.49, 0, 1, 0),
+        Position = UDim2.new(0.51, 0, 0, 0),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Content + 2,
+        Parent = scrollFrame,
+    })
+    
+    Utility.AddListLayout(leftColumn, CONFIG.Spacing.Large)
+    Utility.AddListLayout(rightColumn, CONFIG.Spacing.Large)
+    
+    tab.Button = button
+    tab.Content = scrollFrame
+    tab.LeftColumn = leftColumn
+    tab.RightColumn = rightColumn
+    
+    -- Click handler
+    button.MouseButton1Click:Connect(function()
+        self:SelectTab(tab)
+    end)
+    
+    -- Hover effects
+    button.MouseEnter:Connect(function()
+        if not tab.Active then
+            Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    button.MouseLeave:Connect(function()
+        if not tab.Active then
+            Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.Sidebar}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    table.insert(self.Tabs, tab)
+    
+    -- Select first tab automatically
+    if #self.Tabs == 1 then
+        self:SelectTab(tab)
+    end
+    
+    -- Update all tab widths
+    for i, t in ipairs(self.Tabs) do
+        local newWidth = 650 / #self.Tabs
+        Utility.Tween(t.Button, {Size = UDim2.new(0, newWidth, 1, 0)}, CONFIG.Animation.Normal)
+    end
+    
+    return tab
+end
+
+function PepsiUI:SelectTab(tab)
+    -- Deselect all tabs
+    for _, t in ipairs(self.Tabs) do
+        t.Active = false
+        t.Content.Visible = false
+        
+        Utility.Tween(t.Button, {
+            BackgroundColor3 = CONFIG.Colors.Sidebar
+        }, CONFIG.Animation.Fast)
+        
+        if t.TextLabel then
+            Utility.Tween(t.TextLabel, {TextColor3 = CONFIG.Colors.TextDark}, CONFIG.Animation.Fast)
+        end
+        if t.IconLabel then
+            Utility.Tween(t.IconLabel, {TextColor3 = CONFIG.Colors.TextDark}, CONFIG.Animation.Fast)
+        end
+    end
+    
+    -- Select new tab
+    tab.Active = true
+    tab.Content.Visible = true
+    self.ActiveTab = tab
+    
+    Utility.Tween(tab.Button, {
+        BackgroundColor3 = CONFIG.Colors.Active
+    }, CONFIG.Animation.Normal)
+    
+    if tab.TextLabel then
+        Utility.Tween(tab.TextLabel, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Normal)
+    end
+    if tab.IconLabel then
+        Utility.Tween(tab.IconLabel, {TextColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Normal)
+    end
+    
+    -- Animate indicator
+    local buttonPos = tab.Button.AbsolutePosition.X - self.TabsContainer.AbsolutePosition.X
+    local buttonWidth = tab.Button.AbsoluteSize.X
+    
+    Utility.Tween(self.TabIndicator, {
+        Position = UDim2.new(0, buttonPos, 1, -2),
+        Size = UDim2.new(0, buttonWidth, 0, 2)
+    }, CONFIG.Animation.Normal, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+end
+
+-- ============================================
+-- SECTION SYSTEM
+-- ============================================
+function PepsiUI:AddSection(tab, name, side)
+    side = side or "left"
+    
+    local section = {
+        Name = name,
+        Side = side,
+        Elements = {},
+    }
+    
+    local parentColumn = side == "left" and tab.LeftColumn or tab.RightColumn
+    
+    local container = Utility.Create("Frame", {
+        Name = "Section_" .. name,
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = CONFIG.Colors.Sidebar,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 3,
+        Parent = parentColumn,
+    })
+    
+    Utility.AddCorner(container, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(container, CONFIG.Colors.Border, 1)
+    Utility.AddPadding(container, CONFIG.Spacing.Medium)
+    Utility.AddListLayout(container, CONFIG.Spacing.Small)
+    
+    -- Section Title
+    local title = Utility.Create("TextLabel", {
+        Name = "SectionTitle",
+        Size = UDim2.new(1, 0, 0, 16),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = CONFIG.FontSizes.Medium,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 4,
+        Parent = container,
+    })
+    
+    -- Separator line
+    local separator = Utility.Create("Frame", {
+        Name = "Separator",
+        Size = UDim2.new(1, 0, 0, 1),
+        BackgroundColor3 = CONFIG.Colors.Border,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 4,
+        Parent = container,
+    })
+    
+    section.Container = container
+    section.Title = title
+    
+    table.insert(tab.Sections, section)
+    
+    -- Update canvas size
+    task.spawn(function()
+        while container and container.Parent do
+            task.wait(0.1)
+            local leftHeight = tab.LeftColumn.UIListLayout.AbsoluteContentSize.Y
+            local rightHeight = tab.RightColumn.UIListLayout.AbsoluteContentSize.Y
+            local maxHeight = math.max(leftHeight, rightHeight)
+            tab.Content.CanvasSize = UDim2.new(0, 0, 0, maxHeight + 16)
+        end
+    end)
+    
+    return section
+end
+
+-- ============================================
+-- TOGGLE COMPONENT
+-- ============================================
+function PepsiUI:AddToggle(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Toggle"
+    local default = config.Default or false
+    local callback = config.Callback or function() end
+    
+    local toggle = {
+        Name = name,
+        Value = default,
+        Callback = callback,
+        Type = "Toggle",
+    }
+    
+    local container = Utility.Create("Frame", {
+        Name = "Toggle_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.ComponentHeight),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    -- Checkbox background
+    local checkboxBg = Utility.Create("Frame", {
+        Size = UDim2.new(0, 14, 0, 14),
+        Position = UDim2.new(0, 0, 0, 2),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(checkboxBg, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(checkboxBg, CONFIG.Colors.Border, 1)
+    
+    -- Checkmark
+    local checkmark = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = 11,
+        TextColor3 = CONFIG.Colors.Accent,
+        Text = "✓",
+        Visible = default,
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = checkboxBg,
+    })
+    
+    -- Label
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.new(0, 20, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    -- Click detector
+    local button = Utility.Create("TextButton", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        ZIndex = CONFIG.ZIndex.Content + 8,
+        Parent = container,
+    })
+    
+    function toggle:Set(value)
+        self.Value = value
+        checkmark.Visible = value
+        
+        if value then
+            Utility.Tween(checkboxBg, {BackgroundColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+            Utility.Tween(checkmark, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
+        else
+            Utility.Tween(checkboxBg, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        end
+        
+        self.Callback(value)
+    end
+    
+    button.MouseButton1Click:Connect(function()
+        toggle:Set(not toggle.Value)
+    end)
+    
+    button.MouseEnter:Connect(function()
+        Utility.Tween(label, {TextColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+    end)
+    
+    button.MouseLeave:Connect(function()
+        Utility.Tween(label, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
+    end)
+    
+    toggle.Container = container
+    toggle.Label = label
+    toggle.Checkmark = checkmark
+    
+    table.insert(section.Elements, toggle)
+    return toggle
+end
+
+-- ============================================
+-- SLIDER COMPONENT
+-- ============================================
+function PepsiUI:AddSlider(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Slider"
+    local min = config.Min or 0
+    local max = config.Max or 100
+    local default = config.Default or min
+    local increment = config.Increment or 1
+    local suffix = config.Suffix or ""
+    local callback = config.Callback or function() end
+    
+    local slider = {
+        Name = name,
+        Min = min,
+        Max = max,
+        Value = default,
+        Increment = increment,
+        Suffix = suffix,
+        Callback = callback,
+        Type = "Slider",
+        Dragging = false,
+    }
+    
+    local container = Utility.Create("Frame", {
+        Name = "Slider_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.SliderHeight),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    -- Label
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(0.7, 0, 0, 14),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    -- Value display
+    local valueLabel = Utility.Create("TextLabel", {
+        Size = UDim2.new(0.3, 0, 0, 14),
+        Position = UDim2.new(0.7, 0, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = tostring(default) .. suffix,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    -- Slider bar background
+    local barBg = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 5),
+        Position = UDim2.new(0, 0, 0, 20),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(barBg, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(barBg, CONFIG.Colors.Border, 1)
+    
+    -- Fill
+    local fill = Utility.Create("Frame", {
+        Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = CONFIG.Colors.Accent,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = barBg,
+    })
+    
+    Utility.AddCorner(fill, CONFIG.CornerRadius.Small)
+    
+    -- Handle
+    local handle = Utility.Create("Frame", {
+        Size = UDim2.new(0, 10, 0, 13),
+        Position = UDim2.new((default - min) / (max - min), -5, 0.5, -6.5),
+        BackgroundColor3 = CONFIG.Colors.Text,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 8,
+        Parent = barBg,
+    })
+    
+    Utility.AddCorner(handle, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(handle, CONFIG.Colors.Border, 1)
+    
+    function slider:Set(value)
+        value = math.clamp(value, self.Min, self.Max)
+        value = math.floor((value / self.Increment) + 0.5) * self.Increment
+        self.Value = value
+        
+        local percent = (value - self.Min) / (self.Max - self.Min)
+        
+        local tweenDuration = self.Dragging and 0 or CONFIG.Animation.Fast
+        Utility.Tween(fill, {Size = UDim2.new(percent, 0, 1, 0)}, tweenDuration)
+        Utility.Tween(handle, {Position = UDim2.new(percent, -5, 0.5, -6.5)}, tweenDuration)
+        
+        valueLabel.Text = tostring(value) .. self.Suffix
+        self.Callback(value)
+    end
+    
+    barBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            slider.Dragging = true
+            Utility.Tween(handle, {Size = UDim2.new(0, 12, 0, 15)}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    barBg.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            slider.Dragging = false
+            Utility.Tween(handle, {Size = UDim2.new(0, 10, 0, 13)}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if slider.Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local pos = barBg.AbsolutePosition
+            local size = barBg.AbsoluteSize
+            local mouse = UserInputService:GetMouseLocation()
+            
+            local relX = math.clamp(mouse.X - pos.X, 0, size.X)
+            local percent = relX / size.X
             local value = slider.Min + (slider.Max - slider.Min) * percent
             
             slider:Set(value)
         end
     end)
     
-    slider.Handle.MouseEnter:Connect(function()
-        Utils.Tween(slider.Handle, {Size = UDim2.new(0, 24, 0, 24)}, 0.15)
-    end)
-    
-    slider.Handle.MouseLeave:Connect(function()
-        if not dragging then
-            Utils.Tween(slider.Handle, {Size = UDim2.new(0, 20, 0, 20)}, 0.15)
+    handle.MouseEnter:Connect(function()
+        if not slider.Dragging then
+            Utility.Tween(handle, {BackgroundColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
         end
     end)
     
-    -- Set initial value
-    slider:Set(slider.Default)
+    handle.MouseLeave:Connect(function()
+        if not slider.Dragging then
+            Utility.Tween(handle, {BackgroundColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
+        end
+    end)
     
+    slider.Container = container
+    slider.Label = label
+    slider.ValueLabel = valueLabel
+    
+    table.insert(section.Elements, slider)
     return slider
 end
 
 -- ============================================
--- DROPDOWN COMPONENT (ИСПРАВЛЕН С СДВИГОМ)
+-- DROPDOWN COMPONENT (HIGH Z-INDEX)
 -- ============================================
-function PepsiUI:CreateDropdown(parent, config)
+function PepsiUI:AddDropdown(section, config)
     config = config or {}
+    local name = config.Name or config.Text or "Dropdown"
+    local options = config.Options or {"Option 1", "Option 2", "Option 3"}
+    local default = config.Default or options[1]
+    local callback = config.Callback or function() end
     
     local dropdown = {
-        Text = config.Text or "Dropdown",
-        Options = config.Options or {"Option 1", "Option 2", "Option 3"},
-        Default = config.Default or config.Options[1],
-        Callback = config.Callback or function() end,
-        Value = config.Default or config.Options[1],
+        Name = name,
+        Options = options,
+        Value = default,
+        Callback = callback,
+        Type = "Dropdown",
         Open = false,
-        ExpandedHeight = 0,
     }
     
-    dropdown.Frame = Utils.CreateInstance("Frame", {
-        Name = "Dropdown",
-        Size = UDim2.new(1, 0, 0, 65),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
+    local container = Utility.Create("Frame", {
+        Name = "Dropdown_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.DropdownHeight),
+        BackgroundTransparency = 1,
+        ClipsDescendants = false,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
     })
-    
-    Utils.AddStroke(dropdown.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(dropdown.Frame, CONFIG.CornerRadius.MD)
     
     -- Label
-    dropdown.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -30, 0, 15),
-        Position = UDim2.new(0, 15, 0, 8),
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 14),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.XS,
-        TextColor3 = CONFIG.Colors.Gray400,
-        Text = dropdown.Text:upper(),
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
         TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = dropdown.Frame,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
     })
     
-    -- Selected value display
-    dropdown.Display = Utils.CreateInstance("TextButton", {
-        Name = "Display",
-        Size = UDim2.new(1, -60, 0, 30),
-        Position = UDim2.new(0, 15, 0, 28),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        Text = dropdown.Value,
+    -- Button
+    local button = Utility.Create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 18),
+        Position = UDim2.new(0, 0, 0, 16),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = "",
         TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = dropdown.Frame,
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
     })
     
-    -- Arrow indicator
-    dropdown.Arrow = Utils.CreateInstance("TextLabel", {
-        Name = "Arrow",
-        Size = UDim2.new(0, 20, 0, 20),
-        Position = UDim2.new(1, -35, 0, 35),
+    Utility.AddCorner(button, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(button, CONFIG.Colors.Border, 1)
+    Utility.AddPadding(button, CONFIG.Spacing.Small)
+    
+    local buttonText = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, -20, 1, 0),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Display,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = default,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = button,
+    })
+    
+    -- Arrow
+    local arrow = Utility.Create("TextLabel", {
+        Size = UDim2.new(0, 14, 1, 0),
+        Position = UDim2.new(1, -16, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
         Text = "▼",
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = dropdown.Frame,
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = button,
     })
     
-    -- Options container
-    dropdown.OptionsFrame = Utils.CreateInstance("Frame", {
-        Name = "Options",
+    -- Options frame (CRITICAL: HIGH Z-INDEX!)
+    local optionsFrame = Utility.Create("Frame", {
+        Name = "OptionsFrame",
         Size = UDim2.new(1, 0, 0, 0),
-        Position = UDim2.new(0, 0, 0, 65),
-        BackgroundColor3 = CONFIG.Colors.Gray800,
+        Position = UDim2.new(0, 0, 0, 34),
+        BackgroundColor3 = CONFIG.Colors.Background,
         BorderSizePixel = 0,
         Visible = false,
         ClipsDescendants = true,
-        ZIndex = CONFIG.ZIndex.Dropdown,
-        Parent = dropdown.Frame,
+        ZIndex = CONFIG.ZIndex.Dropdown, -- 1500! ALWAYS ON TOP
+        Parent = container,
     })
     
-    Utils.AddStroke(dropdown.OptionsFrame, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(dropdown.OptionsFrame, CONFIG.CornerRadius.MD)
+    Utility.AddCorner(optionsFrame, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(optionsFrame, CONFIG.Colors.Accent, 1)
     
-    dropdown.OptionsList = Utils.CreateInstance("ScrollingFrame", {
-        Name = "OptionsList",
+    local optionsList = Utility.Create("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = CONFIG.Colors.White,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = CONFIG.Colors.Border,
         ZIndex = CONFIG.ZIndex.Dropdown + 1,
-        Parent = dropdown.OptionsFrame,
+        Parent = optionsFrame,
     })
     
-    Utils.AddListLayout(dropdown.OptionsList, 2, Enum.FillDirection.Vertical)
+    Utility.AddListLayout(optionsList, 1)
+    
+    function dropdown:Refresh(newOptions)
+        self.Options = newOptions or self.Options
+        
+        -- Clear existing
+        for _, child in ipairs(optionsList:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+        
+        -- Create new options
+        for i, opt in ipairs(self.Options) do
+            local optButton = Utility.Create("TextButton", {
+                Size = UDim2.new(1, 0, 0, 22),
+                BackgroundColor3 = CONFIG.Colors.Sidebar,
+                BorderSizePixel = 0,
+                Font = CONFIG.Fonts.Main,
+                TextSize = CONFIG.FontSizes.Small,
+                TextColor3 = CONFIG.Colors.Text,
+                Text = "",
+                TextXAlignment = Enum.TextXAlignment.Left,
+                AutoButtonColor = false,
+                ZIndex = CONFIG.ZIndex.Dropdown + 2,
+                Parent = optionsList,
+            })
+            
+            Utility.AddPadding(optButton, CONFIG.Spacing.Small)
+            
+            local optText = Utility.Create("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Font = CONFIG.Fonts.Main,
+                TextSize = CONFIG.FontSizes.Small,
+                TextColor3 = CONFIG.Colors.Text,
+                Text = opt,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd,
+                ZIndex = CONFIG.ZIndex.Dropdown + 3,
+                Parent = optButton,
+            })
+            
+            optButton.MouseEnter:Connect(function()
+                Utility.Tween(optButton, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+                Utility.Tween(optText, {TextColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+            end)
+            
+            optButton.MouseLeave:Connect(function()
+                Utility.Tween(optButton, {BackgroundColor3 = CONFIG.Colors.Sidebar}, CONFIG.Animation.Fast)
+                Utility.Tween(optText, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
+            end)
+            
+            optButton.MouseButton1Click:Connect(function()
+                dropdown:Set(opt)
+                dropdown:Close()
+            end)
+        end
+        
+        optionsList.CanvasSize = UDim2.new(0, 0, 0, #self.Options * 23)
+    end
+    
+    function dropdown:Set(value)
+        self.Value = value
+        buttonText.Text = value
+        self.Callback(value)
+    end
     
     function dropdown:Toggle()
         self.Open = not self.Open
         
         if self.Open then
-            -- Register as active dropdown
-            table.insert(PepsiUI.ActiveDropdowns or {}, self)
+            table.insert(PepsiUI.ActiveDropdowns, self)
             
-            -- Calculate height
-            local optionHeight = 35
-            local maxVisible = 5
-            local totalHeight = math.min(#self.Options * optionHeight, maxVisible * optionHeight)
-            self.ExpandedHeight = totalHeight + 4
+            local height = math.min(#self.Options * 23, 110)
+            optionsFrame.Visible = true
             
-            -- СДВИГ ЭЛЕМЕНТОВ ВНИЗ
-            Utils.ShiftElementsBelow(self.Frame, self.ExpandedHeight, false)
-            
-            self.OptionsFrame.Visible = true
-            Utils.Tween(self.OptionsFrame, {Size = UDim2.new(1, 0, 0, totalHeight)}, 0.3)
-            Utils.Tween(self.Arrow, {Rotation = 180}, 0.2)
-            Utils.Tween(self.Frame, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
+            Utility.Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, height)}, CONFIG.Animation.Normal)
+            Utility.Tween(arrow, {Rotation = 180}, CONFIG.Animation.Normal)
+            Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
         else
             self:Close()
         end
@@ -1051,484 +1382,461 @@ function PepsiUI:CreateDropdown(parent, config)
     
     function dropdown:Close()
         if not self.Open then return end
-        
         self.Open = false
         
-        -- ВОССТАНОВЛЕНИЕ ПОЗИЦИЙ ЭЛЕМЕНТОВ
-        Utils.ShiftElementsBelow(self.Frame, self.ExpandedHeight, true)
+        Utility.Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, CONFIG.Animation.Normal)
+        Utility.Tween(arrow, {Rotation = 0}, CONFIG.Animation.Normal)
+        Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
         
-        Utils.Tween(self.OptionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.3)
-        task.wait(0.3)
-        self.OptionsFrame.Visible = false
-        Utils.Tween(self.Arrow, {Rotation = 0}, 0.2)
-        Utils.Tween(self.Frame, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
+        task.wait(CONFIG.Animation.Normal)
+        optionsFrame.Visible = false
         
-        -- Remove from active dropdowns
-        if PepsiUI.ActiveDropdowns then
-            for i, dd in ipairs(PepsiUI.ActiveDropdowns) do
-                if dd == self then
-                    table.remove(PepsiUI.ActiveDropdowns, i)
-                    break
-                end
+        -- Remove from active list
+        for i, dd in ipairs(PepsiUI.ActiveDropdowns) do
+            if dd == self then
+                table.remove(PepsiUI.ActiveDropdowns, i)
+                break
             end
         end
     end
     
-    function dropdown:Set(value)
-        self.Value = value
-        self.Display.Text = value
-        self.Callback(value)
-        self:Close()
-    end
-    
-    function dropdown:Refresh(options)
-        self.Options = options
-        
-        -- Clear existing options
-        for _, child in pairs(self.OptionsList:GetChildren()) do
-            if child:IsA("TextButton") then
-                child:Destroy()
-            end
-        end
-        
-        -- Create new options
-        for _, optionText in ipairs(options) do
-            local option = Utils.CreateInstance("TextButton", {
-                Name = "Option_" .. optionText,
-                Size = UDim2.new(1, 0, 0, 35),
-                BackgroundColor3 = CONFIG.Colors.Gray700,
-                BorderSizePixel = 0,
-                Font = CONFIG.Fonts.Mono,
-                TextSize = CONFIG.FontSizes.Base,
-                TextColor3 = CONFIG.Colors.White,
-                Text = optionText,
-                ZIndex = CONFIG.ZIndex.Dropdown + 2,
-                Parent = self.OptionsList,
-            })
-            
-            Utils.AddStroke(option, CONFIG.Colors.Gray600, 1)
-            Utils.AddCorner(option, CONFIG.CornerRadius.SM)
-            
-            option.MouseButton1Click:Connect(function()
-                dropdown:Set(optionText)
-            end)
-            
-            option.MouseEnter:Connect(function()
-                Utils.Tween(option, {BackgroundColor3 = CONFIG.Colors.Black}, 0.15)
-            end)
-            
-            option.MouseLeave:Connect(function()
-                Utils.Tween(option, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.15)
-            end)
-        end
-        
-        self.OptionsList.CanvasSize = UDim2.new(0, 0, 0, #options * 37)
-    end
-    
-    dropdown.Display.MouseButton1Click:Connect(function()
+    button.MouseButton1Click:Connect(function()
         dropdown:Toggle()
     end)
     
-    dropdown.Frame.MouseEnter:Connect(function()
+    button.MouseEnter:Connect(function()
         if not dropdown.Open then
-            Utils.Tween(dropdown.Frame, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
+            Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
         end
     end)
     
-    dropdown.Frame.MouseLeave:Connect(function()
+    button.MouseLeave:Connect(function()
         if not dropdown.Open then
-            Utils.Tween(dropdown.Frame, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
+            Utility.Tween(button, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
         end
     end)
     
-    -- Initialize options
-    dropdown:Refresh(dropdown.Options)
-    dropdown:Set(dropdown.Default)
+    dropdown:Refresh()
+    dropdown.Container = container
+    dropdown.Button = button
+    dropdown.ButtonText = buttonText
     
+    table.insert(section.Elements, dropdown)
     return dropdown
-end
-
--- ============================================
--- TEXTBOX/INPUT COMPONENT
--- ============================================
-function PepsiUI:CreateTextbox(parent, config)
-    config = config or {}
-    
-    local textbox = {
-        Text = config.Text or "Input",
-        Default = config.Default or "",
-        Placeholder = config.Placeholder or "Enter text...",
-        Callback = config.Callback or function() end,
-        Value = config.Default or "",
-    }
-    
-    textbox.Frame = Utils.CreateInstance("Frame", {
-        Name = "Textbox",
-        Size = UDim2.new(1, 0, 0, 60),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
-    
-    Utils.AddStroke(textbox.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(textbox.Frame, CONFIG.CornerRadius.MD)
-    
-    textbox.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -30, 0, 18),
-        Position = UDim2.new(0, 15, 0, 8),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.XS,
-        TextColor3 = CONFIG.Colors.Gray400,
-        Text = textbox.Text:upper(),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = textbox.Frame,
-    })
-    
-    textbox.Input = Utils.CreateInstance("TextBox", {
-        Name = "Input",
-        Size = UDim2.new(1, -30, 0, 25),
-        Position = UDim2.new(0, 15, 0, 28),
-        BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        PlaceholderText = textbox.Placeholder,
-        PlaceholderColor3 = CONFIG.Colors.Gray500,
-        Text = textbox.Default,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ClearTextOnFocus = false,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = textbox.Frame,
-    })
-    
-    textbox.Input.Focused:Connect(function()
-        Utils.Tween(textbox.Frame, {BackgroundColor3 = CONFIG.Colors.Black}, 0.2)
-        local stroke = textbox.Frame:FindFirstChildOfClass("UIStroke")
-        if stroke then
-            Utils.Tween(stroke, {Color = CONFIG.Colors.White}, 0.2)
-        end
-    end)
-    
-    textbox.Input.FocusLost:Connect(function()
-        Utils.Tween(textbox.Frame, {BackgroundColor3 = CONFIG.Colors.Gray700}, 0.2)
-        local stroke = textbox.Frame:FindFirstChildOfClass("UIStroke")
-        if stroke then
-            Utils.Tween(stroke, {Color = CONFIG.Colors.Gray600}, 0.2)
-        end
-        
-        textbox.Value = textbox.Input.Text
-        textbox.Callback(textbox.Value)
-    end)
-    
-    return textbox
 end
 
 -- ============================================
 -- KEYBIND COMPONENT
 -- ============================================
-function PepsiUI:CreateKeybind(parent, config)
+function PepsiUI:AddKeybind(section, config)
     config = config or {}
+    local name = config.Name or config.Text or "Keybind"
+    local default = config.Default or Enum.KeyCode.E
+    local callback = config.Callback or function() end
     
     local keybind = {
-        Text = config.Text or "Keybind",
-        Default = config.Default or Enum.KeyCode.E,
-        Callback = config.Callback or function() end,
-        Key = config.Default or Enum.KeyCode.E,
+        Name = name,
+        Key = default,
+        Callback = callback,
+        Type = "Keybind",
         Listening = false,
+        Enabled = false,
     }
     
-    keybind.Frame = Utils.CreateInstance("Frame", {
-        Name = "Keybind",
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
-    
-    Utils.AddStroke(keybind.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(keybind.Frame, CONFIG.CornerRadius.MD)
-    
-    keybind.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -100, 1, 0),
-        Position = UDim2.new(0, 15, 0, 0),
+    local container = Utility.Create("Frame", {
+        Name = "Keybind_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.ComponentHeight),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        Text = keybind.Text,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    -- Label
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(0.6, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
         TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = keybind.Frame,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
     })
     
-    keybind.Button = Utils.CreateInstance("TextButton", {
-        Name = "Button",
-        Size = UDim2.new(0, 70, 0, 28),
-        Position = UDim2.new(1, -85, 0.5, -14),
-        BackgroundColor3 = CONFIG.Colors.Gray600,
+    -- Key button
+    local keyButton = Utility.Create("TextButton", {
+        Size = UDim2.new(0.38, 0, 0, 16),
+        Position = UDim2.new(0.62, 0, 0, 1),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
         BorderSizePixel = 0,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.SM,
-        TextColor3 = CONFIG.Colors.White,
-        Text = keybind.Key.Name,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = keybind.Frame,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = "[" .. default.Name .. "]",
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
     })
     
-    Utils.AddStroke(keybind.Button, CONFIG.Colors.Gray500, CONFIG.BorderWidth)
-    Utils.AddCorner(keybind.Button, CONFIG.CornerRadius.MD)
+    Utility.AddCorner(keyButton, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(keyButton, CONFIG.Colors.Border, 1)
     
     function keybind:Set(key)
         self.Key = key
-        self.Button.Text = key.Name
+        keyButton.Text = "[" .. key.Name .. "]"
         self.Listening = false
-        Utils.Tween(self.Button, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
-        self.Callback(key)
+        
+        Utility.Tween(keyButton, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        Utility.Tween(keyButton, {TextColor3 = CONFIG.Colors.TextDark}, CONFIG.Animation.Fast)
+        
+        -- Update keybinds panel
+        PepsiUI:AddKeybindDisplay(self.Name, key.Name, self.Enabled)
     end
     
-    keybind.Button.MouseButton1Click:Connect(function()
+    keyButton.MouseButton1Click:Connect(function()
         keybind.Listening = true
-        keybind.Button.Text = "..."
-        Utils.Tween(keybind.Button, {BackgroundColor3 = CONFIG.Colors.White}, 0.2)
-        Utils.Tween(keybind.Button, {TextColor3 = CONFIG.Colors.Black}, 0.2)
+        keyButton.Text = "..."
+        Utility.Tween(keyButton, {BackgroundColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+        Utility.Tween(keyButton, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
     end)
     
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    keyButton.MouseEnter:Connect(function()
+        if not keybind.Listening then
+            Utility.Tween(keyButton, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    keyButton.MouseLeave:Connect(function()
+        if not keybind.Listening then
+            Utility.Tween(keyButton, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    UserInputService.InputBegan:Connect(function(input, processed)
         if keybind.Listening and input.UserInputType == Enum.UserInputType.Keyboard then
             keybind:Set(input.KeyCode)
-            Utils.Tween(keybind.Button, {TextColor3 = CONFIG.Colors.White}, 0.2)
         end
         
-        if not gameProcessed and input.KeyCode == keybind.Key then
-            keybind.Callback(keybind.Key)
+        if not processed and input.KeyCode == keybind.Key then
+            keybind.Enabled = not keybind.Enabled
+            keybind.Callback(keybind.Key, keybind.Enabled)
+            PepsiUI:AddKeybindDisplay(keybind.Name, keybind.Key.Name, keybind.Enabled)
         end
     end)
     
-    keybind.Button.MouseEnter:Connect(function()
-        if not keybind.Listening then
-            Utils.Tween(keybind.Button, {BackgroundColor3 = CONFIG.Colors.Gray500}, 0.2)
-        end
-    end)
+    keybind.Container = container
+    keybind.Label = label
+    keybind.Button = keyButton
     
-    keybind.Button.MouseLeave:Connect(function()
-        if not keybind.Listening then
-            Utils.Tween(keybind.Button, {BackgroundColor3 = CONFIG.Colors.Gray600}, 0.2)
-        end
-    end)
-    
+    table.insert(section.Elements, keybind)
     return keybind
 end
 
 -- ============================================
--- LABEL/TEXT COMPONENT
+-- TEXTBOX COMPONENT
 -- ============================================
-function PepsiUI:CreateLabel(parent, config)
+function PepsiUI:AddTextbox(section, config)
     config = config or {}
+    local name = config.Name or config.Text or "Textbox"
+    local default = config.Default or ""
+    local placeholder = config.Placeholder or "Enter text..."
+    local callback = config.Callback or function() end
     
-    local label = {
-        Text = config.Text or "Label",
+    local textbox = {
+        Name = name,
+        Value = default,
+        Placeholder = placeholder,
+        Callback = callback,
+        Type = "Textbox",
     }
     
-    label.Frame = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, 0, 0, 30),
+    local container = Utility.Create("Frame", {
+        Name = "Textbox_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.DropdownHeight),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.Gray300,
-        Text = label.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextWrapped = true,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
     })
     
-    function label:Set(text)
-        self.Text = text
-        self.Frame.Text = text
+    -- Label
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 14),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    -- Input box
+    local inputBox = Utility.Create("TextBox", {
+        Size = UDim2.new(1, 0, 0, 18),
+        Position = UDim2.new(0, 0, 0, 16),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        PlaceholderText = placeholder,
+        PlaceholderColor3 = CONFIG.Colors.TextDimmed,
+        Text = default,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(inputBox, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(inputBox, CONFIG.Colors.Border, 1)
+    Utility.AddPadding(inputBox, CONFIG.Spacing.Small)
+    
+    function textbox:Set(value)
+        self.Value = value
+        inputBox.Text = value
+        self.Callback(value)
     end
     
+    inputBox.Focused:Connect(function()
+        Utility.Tween(inputBox, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+        local stroke = inputBox:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    inputBox.FocusLost:Connect(function()
+        Utility.Tween(inputBox, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        local stroke = inputBox:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Border}, CONFIG.Animation.Fast)
+        end
+        
+        textbox.Value = inputBox.Text
+        textbox.Callback(inputBox.Text)
+    end)
+    
+    textbox.Container = container
+    textbox.InputBox = inputBox
+    
+    table.insert(section.Elements, textbox)
+    return textbox
+end
+
+-- ============================================
+-- LABEL COMPONENT
+-- ============================================
+function PepsiUI:AddLabel(section, config)
+    config = config or {}
+    local text = config.Text or "Label"
+    
+    local label = {
+        Text = text,
+        Type = "Label",
+    }
+    
+    local textLabel = Utility.Create("TextLabel", {
+        Name = "Label",
+        Size = UDim2.new(1, 0, 0, 14),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextWrapped = true,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    function label:Set(newText)
+        self.Text = newText
+        textLabel.Text = newText
+    end
+    
+    label.Label = textLabel
+    table.insert(section.Elements, label)
     return label
 end
 
 -- ============================================
--- DIVIDER/SEPARATOR COMPONENT
+-- DIVIDER COMPONENT
 -- ============================================
-function PepsiUI:CreateDivider(parent)
-    local divider = Utils.CreateInstance("Frame", {
+function PepsiUI:AddDivider(section)
+    local divider = Utility.Create("Frame", {
         Name = "Divider",
-        Size = UDim2.new(1, 0, 0, 2),
-        BackgroundColor3 = CONFIG.Colors.Gray600,
+        Size = UDim2.new(1, 0, 0, 1),
+        BackgroundColor3 = CONFIG.Colors.Border,
         BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
     })
-    
-    Utils.AddCorner(divider, CONFIG.CornerRadius.Full)
     
     return divider
 end
 
 -- ============================================
--- COLOR PICKER COMPONENT (КРАСИВЫЙ)
+-- COLOR PICKER COMPONENT (HIGH Z-INDEX)
 -- ============================================
-function PepsiUI:CreateColorPicker(parent, config)
+function PepsiUI:AddColorPicker(section, config)
     config = config or {}
+    local name = config.Name or config.Text or "Color Picker"
+    local default = config.Default or Color3.fromRGB(255, 255, 255)
+    local callback = config.Callback or function() end
     
     local colorPicker = {
-        Text = config.Text or "Color Picker",
-        Default = config.Default or Color3.fromRGB(255, 255, 255),
-        Callback = config.Callback or function() end,
-        Value = config.Default or Color3.fromRGB(255, 255, 255),
+        Name = name,
+        Value = default,
+        Callback = callback,
+        Type = "ColorPicker",
         Open = false,
-        ExpandedHeight = 294,
+        H = 0,
+        S = 1,
+        V = 1,
     }
     
-    colorPicker.Frame = Utils.CreateInstance("Frame", {
-        Name = "ColorPicker",
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = CONFIG.Colors.Gray700,
-        BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Base + 3,
-        Parent = parent,
-    })
+    -- Convert default color to HSV
+    colorPicker.H, colorPicker.S, colorPicker.V = default:ToHSV()
     
-    Utils.AddStroke(colorPicker.Frame, CONFIG.Colors.Gray600, CONFIG.BorderWidth)
-    Utils.AddCorner(colorPicker.Frame, CONFIG.CornerRadius.MD)
-    
-    colorPicker.Label = Utils.CreateInstance("TextLabel", {
-        Name = "Label",
-        Size = UDim2.new(1, -65, 1, 0),
-        Position = UDim2.new(0, 15, 0, 0),
+    local container = Utility.Create("Frame", {
+        Name = "ColorPicker_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.ComponentHeight),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.Base,
-        TextColor3 = CONFIG.Colors.White,
-        Text = colorPicker.Text,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = colorPicker.Frame,
+        ClipsDescendants = false,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
     })
     
-    colorPicker.Preview = Utils.CreateInstance("TextButton", {
-        Name = "Preview",
-        Size = UDim2.new(0, 40, 0, 28),
-        Position = UDim2.new(1, -55, 0.5, -14),
-        BackgroundColor3 = colorPicker.Value,
+    -- Label
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(0.7, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    -- Color preview button
+    local previewButton = Utility.Create("TextButton", {
+        Size = UDim2.new(0, 28, 0, 16),
+        Position = UDim2.new(1, -30, 0, 1),
+        BackgroundColor3 = default,
         BorderSizePixel = 0,
         Text = "",
-        ZIndex = CONFIG.ZIndex.Base + 4,
-        Parent = colorPicker.Frame,
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
     })
     
-    Utils.AddStroke(colorPicker.Preview, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(colorPicker.Preview, CONFIG.CornerRadius.MD)
+    Utility.AddCorner(previewButton, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(previewButton, CONFIG.Colors.Border, 1)
     
-    -- Color picker modal (УЛУЧШЕННЫЙ)
-    colorPicker.Picker = Utils.CreateInstance("Frame", {
-        Name = "Picker",
+    -- Picker frame (CRITICAL: HIGH Z-INDEX!)
+    local pickerFrame = Utility.Create("Frame", {
+        Name = "PickerFrame",
         Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0, 0, 0, 45),
-        BackgroundColor3 = CONFIG.Colors.Gray800,
+        Position = UDim2.new(0, 0, 0, 20),
+        BackgroundColor3 = CONFIG.Colors.Background,
         BorderSizePixel = 0,
         Visible = false,
         ClipsDescendants = true,
-        ZIndex = CONFIG.ZIndex.Dropdown,
-        Parent = colorPicker.Frame,
+        ZIndex = CONFIG.ZIndex.Dropdown, -- 1500! ALWAYS ON TOP
+        Parent = container,
     })
     
-    Utils.AddStroke(colorPicker.Picker, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(colorPicker.Picker, CONFIG.CornerRadius.LG)
+    Utility.AddCorner(pickerFrame, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(pickerFrame, CONFIG.Colors.Accent, 2)
     
-    -- HSV Canvas
-    colorPicker.Canvas = Utils.CreateInstance("ImageButton", {
-        Name = "Canvas",
-        Size = UDim2.new(1, -20, 0, 180),
-        Position = UDim2.new(0, 10, 0, 10),
-        BackgroundColor3 = Color3.fromRGB(255, 0, 0),
+    -- SV Picker Canvas
+    local svCanvas = Utility.Create("ImageButton", {
+        Name = "SVCanvas",
+        Size = UDim2.new(1, -14, 0, 150),
+        Position = UDim2.new(0, 7, 0, 7),
+        BackgroundColor3 = Color3.fromHSV(colorPicker.H, 1, 1),
         BorderSizePixel = 0,
+        AutoButtonColor = false,
         ZIndex = CONFIG.ZIndex.Dropdown + 1,
-        Parent = colorPicker.Picker,
+        Parent = pickerFrame,
     })
     
-    Utils.AddStroke(colorPicker.Canvas, CONFIG.Colors.White, 2)
-    Utils.AddCorner(colorPicker.Canvas, CONFIG.CornerRadius.LG)
+    Utility.AddCorner(svCanvas, CONFIG.CornerRadius.Small)
     
-    -- Gradient overlays for saturation and value
-    local saturation = Utils.CreateInstance("Frame", {
+    -- Saturation gradient
+    local satGradient = Utility.Create("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         ZIndex = CONFIG.ZIndex.Dropdown + 2,
-        Parent = colorPicker.Canvas,
+        Parent = svCanvas,
     })
     
-    Utils.AddCorner(saturation, CONFIG.CornerRadius.LG)
+    Utility.AddCorner(satGradient, CONFIG.CornerRadius.Small)
     
-    local satGradient = Utils.CreateInstance("UIGradient", {
+    local satGrad = Utility.Create("UIGradient", {
         Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 0),
             NumberSequenceKeypoint.new(1, 1),
         }),
         Rotation = 0,
-        Parent = saturation,
+        Parent = satGradient,
     })
     
-    local value = Utils.CreateInstance("Frame", {
+    -- Value gradient
+    local valGradient = Utility.Create("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
         BorderSizePixel = 0,
         ZIndex = CONFIG.ZIndex.Dropdown + 3,
-        Parent = colorPicker.Canvas,
+        Parent = svCanvas,
     })
     
-    Utils.AddCorner(value, CONFIG.CornerRadius.LG)
+    Utility.AddCorner(valGradient, CONFIG.CornerRadius.Small)
     
-    local valGradient = Utils.CreateInstance("UIGradient", {
+    local valGrad = Utility.Create("UIGradient", {
         Transparency = NumberSequence.new({
             NumberSequenceKeypoint.new(0, 1),
             NumberSequenceKeypoint.new(1, 0),
         }),
         Rotation = 90,
-        Parent = value,
+        Parent = valGradient,
     })
     
-    -- Cursor (КРАСИВЫЙ КРУГЛЫЙ)
-    colorPicker.Cursor = Utils.CreateInstance("Frame", {
+    -- Cursor
+    local cursor = Utility.Create("Frame", {
         Name = "Cursor",
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(1, -8, 0, -8),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundColor3 = CONFIG.Colors.White,
+        Size = UDim2.new(0, 14, 0, 14),
+        Position = UDim2.new(colorPicker.S, -7, 1 - colorPicker.V, -7),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         ZIndex = CONFIG.ZIndex.Dropdown + 4,
-        Parent = colorPicker.Canvas,
+        Parent = svCanvas,
     })
     
-    Utils.AddStroke(colorPicker.Cursor, CONFIG.Colors.Black, 3)
-    Utils.AddCorner(colorPicker.Cursor, CONFIG.CornerRadius.Full)
+    Utility.AddCorner(cursor, CONFIG.CornerRadius.Full)
+    Utility.AddStroke(cursor, Color3.fromRGB(0, 0, 0), 2)
     
-    -- Hue slider (КРАСИВЫЙ)
-    colorPicker.HueFrame = Utils.CreateInstance("Frame", {
-        Name = "HueFrame",
-        Size = UDim2.new(1, -20, 0, 24),
-        Position = UDim2.new(0, 10, 0, 200),
+    -- Hue slider
+    local hueSlider = Utility.Create("Frame", {
+        Name = "HueSlider",
+        Size = UDim2.new(1, -14, 0, 18),
+        Position = UDim2.new(0, 7, 0, 164),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         ZIndex = CONFIG.ZIndex.Dropdown + 1,
-        Parent = colorPicker.Picker,
+        Parent = pickerFrame,
     })
     
-    Utils.AddStroke(colorPicker.HueFrame, CONFIG.Colors.White, 2)
-    Utils.AddCorner(colorPicker.HueFrame, CONFIG.CornerRadius.Full)
+    Utility.AddCorner(hueSlider, CONFIG.CornerRadius.Small)
     
-    local hueGradient = Utils.CreateInstance("UIGradient", {
+    local hueGrad = Utility.Create("UIGradient", {
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
             ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
@@ -1538,146 +1846,140 @@ function PepsiUI:CreateColorPicker(parent, config)
             ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
             ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
         }),
-        Parent = colorPicker.HueFrame,
+        Parent = hueSlider,
     })
     
-    -- RGB Display (КРАСИВЫЙ)
-    colorPicker.RGBLabel = Utils.CreateInstance("TextLabel", {
-        Name = "RGB",
-        Size = UDim2.new(1, -20, 0, 28),
-        Position = UDim2.new(0, 10, 0, 234),
-        BackgroundColor3 = CONFIG.Colors.Gray900,
+    -- RGB Display
+    local rgbDisplay = Utility.Create("TextLabel", {
+        Name = "RGBDisplay",
+        Size = UDim2.new(1, -14, 0, 16),
+        Position = UDim2.new(0, 7, 0, 189),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
         BorderSizePixel = 0,
         Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.SM,
-        TextColor3 = CONFIG.Colors.White,
+        TextSize = CONFIG.FontSizes.Tiny,
+        TextColor3 = CONFIG.Colors.Text,
         Text = "RGB: 255, 255, 255",
         ZIndex = CONFIG.ZIndex.Dropdown + 1,
-        Parent = colorPicker.Picker,
+        Parent = pickerFrame,
     })
     
-    Utils.AddStroke(colorPicker.RGBLabel, CONFIG.Colors.Gray700, 2)
-    Utils.AddCorner(colorPicker.RGBLabel, CONFIG.CornerRadius.MD)
+    Utility.AddCorner(rgbDisplay, CONFIG.CornerRadius.Small)
     
-    -- Hex Display
-    colorPicker.HexLabel = Utils.CreateInstance("TextLabel", {
-        Name = "HEX",
-        Size = UDim2.new(1, -20, 0, 28),
-        Position = UDim2.new(0, 10, 0, 268),
-        BackgroundColor3 = CONFIG.Colors.Gray900,
+    -- HEX Display
+    local hexDisplay = Utility.Create("TextLabel", {
+        Name = "HEXDisplay",
+        Size = UDim2.new(1, -14, 0, 16),
+        Position = UDim2.new(0, 7, 0, 212),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
         BorderSizePixel = 0,
         Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.SM,
-        TextColor3 = CONFIG.Colors.White,
+        TextSize = CONFIG.FontSizes.Tiny,
+        TextColor3 = CONFIG.Colors.Text,
         Text = "HEX: #FFFFFF",
         ZIndex = CONFIG.ZIndex.Dropdown + 1,
-        Parent = colorPicker.Picker,
+        Parent = pickerFrame,
     })
     
-    Utils.AddStroke(colorPicker.HexLabel, CONFIG.Colors.Gray700, 2)
-    Utils.AddCorner(colorPicker.HexLabel, CONFIG.CornerRadius.MD)
+    Utility.AddCorner(hexDisplay, CONFIG.CornerRadius.Small)
     
-    -- Color picker logic
-    local h, s, v = 0, 1, 1
+    local draggingSV = false
+    local draggingHue = false
     
     local function updateColor()
-        local color = Color3.fromHSV(h, s, v)
+        local color = Color3.fromHSV(colorPicker.H, colorPicker.S, colorPicker.V)
         colorPicker.Value = color
-        colorPicker.Preview.BackgroundColor3 = color
+        previewButton.BackgroundColor3 = color
+        
+        svCanvas.BackgroundColor3 = Color3.fromHSV(colorPicker.H, 1, 1)
         
         local r = math.floor(color.R * 255)
         local g = math.floor(color.G * 255)
         local b = math.floor(color.B * 255)
-        colorPicker.RGBLabel.Text = string.format("RGB: %d, %d, %d", r, g, b)
         
-        local hex = string.format("#%02X%02X%02X", r, g, b)
-        colorPicker.HexLabel.Text = "HEX: " .. hex
+        rgbDisplay.Text = string.format("RGB: %d, %d, %d", r, g, b)
+        hexDisplay.Text = "HEX: " .. Utility.RGBToHex(color)
         
         colorPicker.Callback(color)
     end
     
-    local function updateHue(input)
-        local relativeX = math.clamp(
-            input.Position.X - colorPicker.HueFrame.AbsolutePosition.X,
-            0,
-            colorPicker.HueFrame.AbsoluteSize.X
-        )
-        h = relativeX / colorPicker.HueFrame.AbsoluteSize.X
-        
-        colorPicker.Canvas.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-        updateColor()
-    end
-    
-    local function updateSV(input)
-        local relativeX = math.clamp(
-            input.Position.X - colorPicker.Canvas.AbsolutePosition.X,
-            0,
-            colorPicker.Canvas.AbsoluteSize.X
-        )
-        local relativeY = math.clamp(
-            input.Position.Y - colorPicker.Canvas.AbsolutePosition.Y,
-            0,
-            colorPicker.Canvas.AbsoluteSize.Y
-        )
-        
-        s = relativeX / colorPicker.Canvas.AbsoluteSize.X
-        v = 1 - (relativeY / colorPicker.Canvas.AbsoluteSize.Y)
-        
-        colorPicker.Cursor.Position = UDim2.new(s, 0, 1 - v, 0)
-        updateColor()
-    end
-    
-    local hueDragging = false
-    local canvasDragging = false
-    
-    colorPicker.HueFrame.InputBegan:Connect(function(input)
+    svCanvas.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            hueDragging = true
-            updateHue(input)
+            draggingSV = true
         end
     end)
     
-    colorPicker.HueFrame.InputEnded:Connect(function(input)
+    svCanvas.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            hueDragging = false
+            draggingSV = false
         end
     end)
     
-    colorPicker.Canvas.InputBegan:Connect(function(input)
+    hueSlider.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            canvasDragging = true
-            updateSV(input)
+            draggingHue = true
         end
     end)
     
-    colorPicker.Canvas.InputEnded:Connect(function(input)
+    hueSlider.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            canvasDragging = false
+            draggingHue = false
         end
     end)
     
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
-            if hueDragging then
-                updateHue(input)
+            if draggingSV then
+                local pos = svCanvas.AbsolutePosition
+                local size = svCanvas.AbsoluteSize
+                local mouse = UserInputService:GetMouseLocation()
+                
+                local relX = math.clamp(mouse.X - pos.X, 0, size.X)
+                local relY = math.clamp(mouse.Y - pos.Y, 0, size.Y)
+                
+                colorPicker.S = relX / size.X
+                colorPicker.V = 1 - (relY / size.Y)
+                
+                cursor.Position = UDim2.new(colorPicker.S, -7, 1 - colorPicker.V, -7)
+                updateColor()
             end
-            if canvasDragging then
-                updateSV(input)
+            
+            if draggingHue then
+                local pos = hueSlider.AbsolutePosition
+                local size = hueSlider.AbsoluteSize
+                local mouse = UserInputService:GetMouseLocation()
+                
+                local relX = math.clamp(mouse.X - pos.X, 0, size.X)
+                colorPicker.H = relX / size.X
+                
+                updateColor()
             end
         end
     end)
+    
+    function colorPicker:Set(color)
+        self.Value = color
+        self.H, self.S, self.V = color:ToHSV()
+        
+        previewButton.BackgroundColor3 = color
+        cursor.Position = UDim2.new(self.S, -7, 1 - self.V, -7)
+        
+        local r = math.floor(color.R * 255)
+        local g = math.floor(color.G * 255)
+        local b = math.floor(color.B * 255)
+        
+        rgbDisplay.Text = string.format("RGB: %d, %d, %d", r, g, b)
+        hexDisplay.Text = "HEX: " .. Utility.RGBToHex(color)
+    end
     
     function colorPicker:Toggle()
         self.Open = not self.Open
         
         if self.Open then
-            table.insert(PepsiUI.ActiveDropdowns or {}, self)
+            table.insert(PepsiUI.ActiveDropdowns, self)
             
-            -- СДВИГ ЭЛЕМЕНТОВ ВНИЗ
-            Utils.ShiftElementsBelow(self.Frame, self.ExpandedHeight, false)
-            
-            self.Picker.Visible = true
-            Utils.Tween(self.Picker, {Size = UDim2.new(1, 0, 0, 302)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+            pickerFrame.Visible = true
+            Utility.Tween(pickerFrame, {Size = UDim2.new(1, 0, 0, 235)}, CONFIG.Animation.Normal, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
         else
             self:Close()
         end
@@ -1685,187 +1987,801 @@ function PepsiUI:CreateColorPicker(parent, config)
     
     function colorPicker:Close()
         if not self.Open then return end
-        
         self.Open = false
         
-        -- ВОССТАНОВЛЕНИЕ ПОЗИЦИЙ ЭЛЕМЕНТОВ
-        Utils.ShiftElementsBelow(self.Frame, self.ExpandedHeight, true)
+        Utility.Tween(pickerFrame, {Size = UDim2.new(1, 0, 0, 0)}, CONFIG.Animation.Normal)
+        task.wait(CONFIG.Animation.Normal)
+        pickerFrame.Visible = false
         
-        Utils.Tween(self.Picker, {Size = UDim2.new(1, 0, 0, 0)}, 0.3)
-        task.wait(0.3)
-        self.Picker.Visible = false
+        for i, cp in ipairs(PepsiUI.ActiveDropdowns) do
+            if cp == self then
+                table.remove(PepsiUI.ActiveDropdowns, i)
+                break
+            end
+        end
     end
     
-    function colorPicker:Set(color)
-        self.Value = color
-        self.Preview.BackgroundColor3 = color
-        
-        -- Convert to HSV
-        h, s, v = color:ToHSV()
-        colorPicker.Canvas.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-        colorPicker.Cursor.Position = UDim2.new(s, 0, 1 - v, 0)
-        
-        local r = math.floor(color.R * 255)
-        local g = math.floor(color.G * 255)
-        local b = math.floor(color.B * 255)
-        self.RGBLabel.Text = string.format("RGB: %d, %d, %d", r, g, b)
-        
-        local hex = string.format("#%02X%02X%02X", r, g, b)
-        self.HexLabel.Text = "HEX: " .. hex
-    end
-    
-    colorPicker.Preview.MouseButton1Click:Connect(function()
+    previewButton.MouseButton1Click:Connect(function()
         colorPicker:Toggle()
     end)
     
-    colorPicker:Set(colorPicker.Default)
+    previewButton.MouseEnter:Connect(function()
+        local stroke = previewButton:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+        end
+    end)
     
+    previewButton.MouseLeave:Connect(function()
+        local stroke = previewButton:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Border}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    updateColor()
+    
+    colorPicker.Container = container
+    colorPicker.PreviewButton = previewButton
+    
+    table.insert(section.Elements, colorPicker)
     return colorPicker
 end
 
 -- ============================================
--- NOTIFICATION SYSTEM (УЛУЧШЕННЫЙ)
+-- INPUT HANDLERS
+-- ============================================
+function PepsiUI:SetupInputHandlers()
+    -- Close dropdowns on click outside
+    UserInputService.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            for _, dropdown in ipairs(self.ActiveDropdowns) do
+                if dropdown and dropdown.Close then
+                    dropdown:Close()
+                end
+            end
+            self.ActiveDropdowns = {}
+        end
+    end)
+end
+
+-- ============================================
+-- BUTTON COMPONENT
+-- ============================================
+function PepsiUI:AddButton(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Button"
+    local callback = config.Callback or function() end
+    
+    local button = {
+        Name = name,
+        Callback = callback,
+        Type = "Button",
+    }
+    
+    local container = Utility.Create("TextButton", {
+        Name = "Button_" .. name,
+        Size = UDim2.new(1, 0, 0, 22),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    Utility.AddCorner(container, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(container, CONFIG.Colors.Border, 1)
+    
+    container.MouseEnter:Connect(function()
+        Utility.Tween(container, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+        Utility.Tween(container, {TextColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+    end)
+    
+    container.MouseLeave:Connect(function()
+        Utility.Tween(container, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        Utility.Tween(container, {TextColor3 = CONFIG.Colors.Text}, CONFIG.Animation.Fast)
+    end)
+    
+    container.MouseButton1Click:Connect(function()
+        Utility.Tween(container, {Size = UDim2.new(1, 0, 0, 20)}, 0.05)
+        task.wait(0.05)
+        Utility.Tween(container, {Size = UDim2.new(1, 0, 0, 22)}, 0.05)
+        button.Callback()
+    end)
+    
+    button.Container = container
+    table.insert(section.Elements, button)
+    return button
+end
+
+-- ============================================
+-- NOTIFICATION SYSTEM
 -- ============================================
 function PepsiUI:Notify(config)
     config = config or {}
+    local title = config.Title or "Notification"
+    local text = config.Text or config.Message or ""
+    local duration = config.Duration or 3
+    local type_ = config.Type or "info" -- info, success, warning, error
     
-    local notification = {
-        Title = config.Title or "Notification",
-        Text = config.Text or "This is a notification",
-        Duration = config.Duration or 3,
-    }
-    
-    -- Create notifications container if it doesn't exist
-    if not self.NotificationsContainer then
-        self.NotificationsContainer = Utils.CreateInstance("Frame", {
-            Name = "Notifications",
-            Size = UDim2.new(0, 320, 1, 0),
-            Position = UDim2.new(1, -330, 0, 10),
+    -- Create notification container if it doesn't exist
+    if not self.NotificationContainer then
+        self.NotificationContainer = Utility.Create("Frame", {
+            Name = "NotificationContainer",
+            Size = UDim2.new(0, 280, 1, 0),
+            Position = UDim2.new(1, -290, 0, 10),
             BackgroundTransparency = 1,
-            ZIndex = CONFIG.ZIndex.Notification,
+            ZIndex = CONFIG.ZIndex.Overlay + 100,
             Parent = self.ScreenGui,
         })
         
-        Utils.AddListLayout(self.NotificationsContainer, CONFIG.Spacing.SM, Enum.FillDirection.Vertical)
+        Utility.AddListLayout(self.NotificationContainer, CONFIG.Spacing.Medium)
     end
     
-    notification.Frame = Utils.CreateInstance("Frame", {
+    local typeColors = {
+        info = CONFIG.Colors.Info,
+        success = CONFIG.Colors.Success,
+        warning = CONFIG.Colors.Warning,
+        error = CONFIG.Colors.Error,
+    }
+    
+    local accentColor = typeColors[type_] or CONFIG.Colors.Accent
+    
+    local notification = Utility.Create("Frame", {
         Name = "Notification",
-        Size = UDim2.new(1, 0, 0, 90),
-        BackgroundColor3 = CONFIG.Colors.Gray800,
+        Size = UDim2.new(1, 0, 0, 70),
+        BackgroundColor3 = CONFIG.Colors.Background,
         BorderSizePixel = 0,
-        BackgroundTransparency = 1,
-        ZIndex = CONFIG.ZIndex.Notification + 1,
-        Parent = self.NotificationsContainer,
+        ZIndex = CONFIG.ZIndex.Overlay + 101,
+        Parent = self.NotificationContainer,
     })
     
-    Utils.AddStroke(notification.Frame, CONFIG.Colors.White, CONFIG.BorderWidth)
-    Utils.AddCorner(notification.Frame, CONFIG.CornerRadius.LG)
+    Utility.AddCorner(notification, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(notification, CONFIG.Colors.Border, 1)
     
     -- Accent line
-    local accentLine = Utils.CreateInstance("Frame", {
-        Name = "AccentLine",
-        Size = UDim2.new(0, 4, 1, 0),
-        BackgroundColor3 = CONFIG.Colors.White,
+    local accentLine = Utility.Create("Frame", {
+        Size = UDim2.new(0, 3, 1, 0),
+        BackgroundColor3 = accentColor,
         BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Notification + 2,
-        Parent = notification.Frame,
+        ZIndex = CONFIG.ZIndex.Overlay + 102,
+        Parent = notification,
     })
     
-    Utils.AddCorner(accentLine, CONFIG.CornerRadius.SM)
+    Utility.AddCorner(accentLine, CONFIG.CornerRadius.Small)
     
-    local content = Utils.CreateInstance("Frame", {
-        Name = "Content",
-        Size = UDim2.new(1, -8, 1, 0),
-        Position = UDim2.new(0, 8, 0, 0),
+    -- Content
+    local content = Utility.Create("Frame", {
+        Size = UDim2.new(1, -10, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
         BackgroundTransparency = 1,
-        ZIndex = CONFIG.ZIndex.Notification + 2,
-        Parent = notification.Frame,
+        ZIndex = CONFIG.ZIndex.Overlay + 102,
+        Parent = notification,
     })
     
-    Utils.AddPadding(content, CONFIG.Spacing.MD)
+    Utility.AddPadding(content, CONFIG.Spacing.Small)
     
-    notification.Title = Utils.CreateInstance("TextLabel", {
-        Name = "Title",
-        Size = UDim2.new(1, 0, 0, 24),
+    local titleLabel = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 16),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Display,
-        TextSize = CONFIG.FontSizes.LG,
-        TextColor3 = CONFIG.Colors.White,
-        Text = notification.Title,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = CONFIG.FontSizes.Medium,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = title,
         TextXAlignment = Enum.TextXAlignment.Left,
-        ZIndex = CONFIG.ZIndex.Notification + 3,
+        ZIndex = CONFIG.ZIndex.Overlay + 103,
         Parent = content,
     })
     
-    notification.Text = Utils.CreateInstance("TextLabel", {
-        Name = "Text",
-        Size = UDim2.new(1, 0, 1, -28),
-        Position = UDim2.new(0, 0, 0, 28),
+    local textLabel = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 1, -20),
+        Position = UDim2.new(0, 0, 0, 20),
         BackgroundTransparency = 1,
-        Font = CONFIG.Fonts.Mono,
-        TextSize = CONFIG.FontSizes.SM,
-        TextColor3 = CONFIG.Colors.Gray300,
-        Text = notification.Text,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = text,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top,
         TextWrapped = true,
-        ZIndex = CONFIG.ZIndex.Notification + 3,
+        ZIndex = CONFIG.ZIndex.Overlay + 103,
         Parent = content,
     })
     
-    -- Animate in (FROM RIGHT WITH FADE)
-    notification.Frame.Position = UDim2.new(1, 50, 0, 0)
-    notification.Frame.BackgroundTransparency = 1
-    
-    Utils.Tween(notification.Frame, {
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 0
-    }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-    
     -- Progress bar
-    local progressBar = Utils.CreateInstance("Frame", {
-        Name = "ProgressBar",
-        Size = UDim2.new(1, 0, 0, 3),
-        Position = UDim2.new(0, 0, 1, -3),
-        BackgroundColor3 = CONFIG.Colors.White,
+    local progressBar = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 2),
+        Position = UDim2.new(0, 0, 1, -2),
+        BackgroundColor3 = accentColor,
         BorderSizePixel = 0,
-        ZIndex = CONFIG.ZIndex.Notification + 3,
-        Parent = notification.Frame,
+        ZIndex = CONFIG.ZIndex.Overlay + 103,
+        Parent = notification,
     })
     
-    Utils.AddCorner(progressBar, CONFIG.CornerRadius.Full)
+    -- Animate in
+    notification.Position = UDim2.new(1, 50, 0, 0)
+    notification.BackgroundTransparency = 1
+    titleLabel.TextTransparency = 1
+    textLabel.TextTransparency = 1
     
-    -- Animate progress bar
-    Utils.Tween(progressBar, {Size = UDim2.new(0, 0, 0, 3)}, notification.Duration, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
+    Utility.Tween(notification, {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0}, CONFIG.Animation.Normal)
+    Utility.Tween(titleLabel, {TextTransparency = 0}, CONFIG.Animation.Normal)
+    Utility.Tween(textLabel, {TextTransparency = 0}, CONFIG.Animation.Normal)
+    
+    -- Progress animation
+    Utility.Tween(progressBar, {Size = UDim2.new(0, 0, 0, 2)}, duration, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
     
     -- Auto remove
-    task.delay(notification.Duration, function()
-        Utils.Tween(notification.Frame, {
+    task.delay(duration, function()
+        Utility.Tween(notification, {
             Position = UDim2.new(1, 50, 0, 0),
             BackgroundTransparency = 1
-        }, 0.3)
+        }, CONFIG.Animation.Normal)
+        Utility.Tween(titleLabel, {TextTransparency = 1}, CONFIG.Animation.Normal)
+        Utility.Tween(textLabel, {TextTransparency = 1}, CONFIG.Animation.Normal)
         
-        task.wait(0.3)
-        notification.Frame:Destroy()
+        task.wait(CONFIG.Animation.Normal)
+        notification:Destroy()
     end)
     
+    table.insert(self.Notifications, notification)
     return notification
+end
+
+-- ============================================
+-- UPDATE LOOP
+-- ============================================
+function PepsiUI:StartUpdateLoop()
+    task.spawn(function()
+        while self.ScreenGui and self.ScreenGui.Parent do
+            task.wait(1)
+            pcall(function()
+                self:UpdateWatermark()
+            end)
+        end
+    end)
+end
+
+-- ============================================
+-- MULTI-DROPDOWN COMPONENT
+-- ============================================
+function PepsiUI:AddMultiDropdown(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Multi Dropdown"
+    local options = config.Options or {"Option 1", "Option 2", "Option 3"}
+    local default = config.Default or {}
+    local callback = config.Callback or function() end
+    
+    local multiDropdown = {
+        Name = name,
+        Options = options,
+        Selected = {},
+        Callback = callback,
+        Type = "MultiDropdown",
+        Open = false,
+    }
+    
+    -- Set defaults
+    for _, opt in ipairs(default) do
+        multiDropdown.Selected[opt] = true
+    end
+    
+    local container = Utility.Create("Frame", {
+        Name = "MultiDropdown_" .. name,
+        Size = UDim2.new(1, 0, 0, CONFIG.Sizes.DropdownHeight),
+        BackgroundTransparency = 1,
+        ClipsDescendants = false,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    local label = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 14),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    local button = Utility.Create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 18),
+        Position = UDim2.new(0, 0, 0, 16),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = "",
+        TextXAlignment = Enum.TextXAlignment.Left,
+        AutoButtonColor = false,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(button, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(button, CONFIG.Colors.Border, 1)
+    Utility.AddPadding(button, CONFIG.Spacing.Small)
+    
+    local function updateButtonText()
+        local selectedList = {}
+        for opt, _ in pairs(multiDropdown.Selected) do
+            table.insert(selectedList, opt)
+        end
+        
+        if #selectedList == 0 then
+            button.Text = "None selected"
+        elseif #selectedList == 1 then
+            button.Text = selectedList[1]
+        else
+            button.Text = #selectedList .. " selected"
+        end
+    end
+    
+    updateButtonText()
+    
+    local arrow = Utility.Create("TextLabel", {
+        Size = UDim2.new(0, 14, 1, 0),
+        Position = UDim2.new(1, -16, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDark,
+        Text = "▼",
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = button,
+    })
+    
+    local optionsFrame = Utility.Create("Frame", {
+        Name = "OptionsFrame",
+        Size = UDim2.new(1, 0, 0, 0),
+        Position = UDim2.new(0, 0, 0, 34),
+        BackgroundColor3 = CONFIG.Colors.Background,
+        BorderSizePixel = 0,
+        Visible = false,
+        ClipsDescendants = true,
+        ZIndex = CONFIG.ZIndex.Dropdown,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(optionsFrame, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(optionsFrame, CONFIG.Colors.Accent, 1)
+    
+    local optionsList = Utility.Create("ScrollingFrame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = CONFIG.Colors.Border,
+        ZIndex = CONFIG.ZIndex.Dropdown + 1,
+        Parent = optionsFrame,
+    })
+    
+    Utility.AddListLayout(optionsList, 1)
+    
+    function multiDropdown:Refresh(newOptions)
+        self.Options = newOptions or self.Options
+        
+        for _, child in ipairs(optionsList:GetChildren()) do
+            if child:IsA("Frame") then
+                child:Destroy()
+            end
+        end
+        
+        for i, opt in ipairs(self.Options) do
+            local optContainer = Utility.Create("Frame", {
+                Size = UDim2.new(1, 0, 0, 22),
+                BackgroundColor3 = CONFIG.Colors.Sidebar,
+                BorderSizePixel = 0,
+                ZIndex = CONFIG.ZIndex.Dropdown + 2,
+                Parent = optionsList,
+            })
+            
+            local checkbox = Utility.Create("Frame", {
+                Size = UDim2.new(0, 12, 0, 12),
+                Position = UDim2.new(0, 5, 0.5, -6),
+                BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+                BorderSizePixel = 0,
+                ZIndex = CONFIG.ZIndex.Dropdown + 3,
+                Parent = optContainer,
+            })
+            
+            Utility.AddCorner(checkbox, CONFIG.CornerRadius.Small)
+            Utility.AddStroke(checkbox, CONFIG.Colors.Border, 1)
+            
+            local checkmark = Utility.Create("TextLabel", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Font = CONFIG.Fonts.Bold,
+                TextSize = 10,
+                TextColor3 = CONFIG.Colors.Accent,
+                Text = "✓",
+                Visible = multiDropdown.Selected[opt] or false,
+                ZIndex = CONFIG.ZIndex.Dropdown + 4,
+                Parent = checkbox,
+            })
+            
+            local optText = Utility.Create("TextLabel", {
+                Size = UDim2.new(1, -25, 1, 0),
+                Position = UDim2.new(0, 22, 0, 0),
+                BackgroundTransparency = 1,
+                Font = CONFIG.Fonts.Main,
+                TextSize = CONFIG.FontSizes.Small,
+                TextColor3 = CONFIG.Colors.Text,
+                Text = opt,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd,
+                ZIndex = CONFIG.ZIndex.Dropdown + 3,
+                Parent = optContainer,
+            })
+            
+            local optButton = Utility.Create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
+                BackgroundTransparency = 1,
+                Text = "",
+                ZIndex = CONFIG.ZIndex.Dropdown + 5,
+                Parent = optContainer,
+            })
+            
+            optButton.MouseEnter:Connect(function()
+                Utility.Tween(optContainer, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+            end)
+            
+            optButton.MouseLeave:Connect(function()
+                Utility.Tween(optContainer, {BackgroundColor3 = CONFIG.Colors.Sidebar}, CONFIG.Animation.Fast)
+            end)
+            
+            optButton.MouseButton1Click:Connect(function()
+                multiDropdown.Selected[opt] = not multiDropdown.Selected[opt]
+                checkmark.Visible = multiDropdown.Selected[opt]
+                
+                if multiDropdown.Selected[opt] then
+                    Utility.Tween(checkbox, {BackgroundColor3 = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+                else
+                    Utility.Tween(checkbox, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+                end
+                
+                updateButtonText()
+                multiDropdown.Callback(multiDropdown:GetSelected())
+            end)
+        end
+        
+        optionsList.CanvasSize = UDim2.new(0, 0, 0, #self.Options * 23)
+    end
+    
+    function multiDropdown:GetSelected()
+        local selected = {}
+        for opt, _ in pairs(self.Selected) do
+            table.insert(selected, opt)
+        end
+        return selected
+    end
+    
+    function multiDropdown:Toggle()
+        self.Open = not self.Open
+        
+        if self.Open then
+            table.insert(PepsiUI.ActiveDropdowns, self)
+            
+            local height = math.min(#self.Options * 23, 110)
+            optionsFrame.Visible = true
+            
+            Utility.Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, height)}, CONFIG.Animation.Normal)
+            Utility.Tween(arrow, {Rotation = 180}, CONFIG.Animation.Normal)
+        else
+            self:Close()
+        end
+    end
+    
+    function multiDropdown:Close()
+        if not self.Open then return end
+        self.Open = false
+        
+        Utility.Tween(optionsFrame, {Size = UDim2.new(1, 0, 0, 0)}, CONFIG.Animation.Normal)
+        Utility.Tween(arrow, {Rotation = 0}, CONFIG.Animation.Normal)
+        task.wait(CONFIG.Animation.Normal)
+        optionsFrame.Visible = false
+        
+        for i, dd in ipairs(PepsiUI.ActiveDropdowns) do
+            if dd == self then
+                table.remove(PepsiUI.ActiveDropdowns, i)
+                break
+            end
+        end
+    end
+    
+    button.MouseButton1Click:Connect(function()
+        multiDropdown:Toggle()
+    end)
+    
+    multiDropdown:Refresh()
+    multiDropdown.Container = container
+    
+    table.insert(section.Elements, multiDropdown)
+    return multiDropdown
+end
+
+-- ============================================
+-- BOX COMPONENT
+-- ============================================
+function PepsiUI:AddBox(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Box"
+    
+    local box = {
+        Name = name,
+        Type = "Box",
+    }
+    
+    local container = Utility.Create("Frame", {
+        Name = "Box_" .. name,
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    Utility.AddCorner(container, CONFIG.CornerRadius.Medium)
+    Utility.AddStroke(container, CONFIG.Colors.Border, 1)
+    Utility.AddPadding(container, CONFIG.Spacing.Medium)
+    Utility.AddListLayout(container, CONFIG.Spacing.Small)
+    
+    local title = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 16),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Bold,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = name,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    box.Container = container
+    box.Title = title
+    
+    function box:AddElement(elementFunc, ...)
+        return elementFunc(self, ...)
+    end
+    
+    table.insert(section.Elements, box)
+    return box
+end
+
+-- ============================================
+-- SEARCH BOX COMPONENT
+-- ============================================
+function PepsiUI:AddSearchBox(section, config)
+    config = config or {}
+    local name = config.Name or config.Text or "Search"
+    local placeholder = config.Placeholder or "Search..."
+    local callback = config.Callback or function() end
+    
+    local searchBox = {
+        Name = name,
+        Value = "",
+        Placeholder = placeholder,
+        Callback = callback,
+        Type = "SearchBox",
+    }
+    
+    local container = Utility.Create("Frame", {
+        Name = "SearchBox_" .. name,
+        Size = UDim2.new(1, 0, 0, 26),
+        BackgroundTransparency = 1,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    local searchFrame = Utility.Create("Frame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(searchFrame, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(searchFrame, CONFIG.Colors.Border, 1)
+    
+    local searchIcon = Utility.Create("TextLabel", {
+        Size = UDim2.new(0, 20, 1, 0),
+        Position = UDim2.new(0, 5, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.TextDimmed,
+        Text = "🔍",
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = searchFrame,
+    })
+    
+    local inputBox = Utility.Create("TextBox", {
+        Size = UDim2.new(1, -30, 1, 0),
+        Position = UDim2.new(0, 25, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        PlaceholderText = placeholder,
+        PlaceholderColor3 = CONFIG.Colors.TextDimmed,
+        Text = "",
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false,
+        ZIndex = CONFIG.ZIndex.Content + 7,
+        Parent = searchFrame,
+    })
+    
+    inputBox:GetPropertyChangedSignal("Text"):Connect(function()
+        searchBox.Value = inputBox.Text
+        searchBox.Callback(inputBox.Text)
+    end)
+    
+    inputBox.Focused:Connect(function()
+        Utility.Tween(searchFrame, {BackgroundColor3 = CONFIG.Colors.Hover}, CONFIG.Animation.Fast)
+        local stroke = searchFrame:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Accent}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    inputBox.FocusLost:Connect(function()
+        Utility.Tween(searchFrame, {BackgroundColor3 = CONFIG.Colors.BackgroundLight}, CONFIG.Animation.Fast)
+        local stroke = searchFrame:FindFirstChildOfClass("UIStroke")
+        if stroke then
+            Utility.Tween(stroke, {Color = CONFIG.Colors.Border}, CONFIG.Animation.Fast)
+        end
+    end)
+    
+    searchBox.Container = container
+    searchBox.InputBox = inputBox
+    
+    table.insert(section.Elements, searchBox)
+    return searchBox
+end
+
+-- ============================================
+-- INFO BOX COMPONENT
+-- ============================================
+function PepsiUI:AddInfoBox(section, config)
+    config = config or {}
+    local text = config.Text or "Information"
+    local type_ = config.Type or "info" -- info, success, warning, error
+    
+    local typeColors = {
+        info = CONFIG.Colors.Info,
+        success = CONFIG.Colors.Success,
+        warning = CONFIG.Colors.Warning,
+        error = CONFIG.Colors.Error,
+    }
+    
+    local accentColor = typeColors[type_] or CONFIG.Colors.Accent
+    
+    local infoBox = {
+        Text = text,
+        Type = type_,
+        AccentColor = accentColor,
+    }
+    
+    local container = Utility.Create("Frame", {
+        Name = "InfoBox",
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = CONFIG.Colors.BackgroundLight,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    Utility.AddCorner(container, CONFIG.CornerRadius.Small)
+    Utility.AddStroke(container, accentColor, 1)
+    
+    local accentBar = Utility.Create("Frame", {
+        Size = UDim2.new(0, 3, 1, 0),
+        BackgroundColor3 = accentColor,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddCorner(accentBar, CONFIG.CornerRadius.Small)
+    
+    local textLabel = Utility.Create("TextLabel", {
+        Size = UDim2.new(1, -15, 1, 0),
+        Position = UDim2.new(0, 12, 0, 0),
+        BackgroundTransparency = 1,
+        Font = CONFIG.Fonts.Main,
+        TextSize = CONFIG.FontSizes.Small,
+        TextColor3 = CONFIG.Colors.Text,
+        Text = text,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Center,
+        TextWrapped = true,
+        ZIndex = CONFIG.ZIndex.Content + 6,
+        Parent = container,
+    })
+    
+    Utility.AddPadding(textLabel, CONFIG.Spacing.Small)
+    
+    function infoBox:Set(newText)
+        self.Text = newText
+        textLabel.Text = newText
+    end
+    
+    infoBox.Container = container
+    infoBox.Label = textLabel
+    
+    table.insert(section.Elements, infoBox)
+    return infoBox
+end
+
+-- ============================================
+-- SPACING COMPONENT
+-- ============================================
+function PepsiUI:AddSpacing(section, height)
+    height = height or CONFIG.Spacing.Large
+    
+    local spacing = Utility.Create("Frame", {
+        Name = "Spacing",
+        Size = UDim2.new(1, 0, 0, height),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ZIndex = CONFIG.ZIndex.Content + 5,
+        Parent = section.Container,
+    })
+    
+    return spacing
 end
 
 -- ============================================
 -- UTILITY METHODS
 -- ============================================
+function PepsiUI:Toggle()
+    self.ScreenGui.Enabled = not self.ScreenGui.Enabled
+end
+
 function PepsiUI:Destroy()
     if self.ScreenGui then
         self.ScreenGui:Destroy()
     end
 end
 
-function PepsiUI:Toggle()
-    if self.ScreenGui then
-        self.ScreenGui.Enabled = not self.ScreenGui.Enabled
+function PepsiUI:GetConfig()
+    local config = {}
+    
+    for _, tab in ipairs(self.Tabs) do
+        config[tab.Name] = {}
+        
+        for _, section in ipairs(tab.Sections) do
+            config[tab.Name][section.Name] = {}
+            
+            for _, element in ipairs(section.Elements) do
+                if element.Type == "Toggle" then
+                    config[tab.Name][section.Name][element.Name] = element.Value
+                elseif element.Type == "Slider" then
+                    config[tab.Name][section.Name][element.Name] = element.Value
+                elseif element.Type == "Dropdown" then
+                    config[tab.Name][section.Name][element.Name] = element.Value
+                elseif element.Type == "Keybind" then
+                    config[tab.Name][section.Name][element.Name] = element.Key.Name
+                elseif element.Type == "Textbox" then
+                    config[tab.Name][section.Name][element.Name] = element.Value
+                end
+            end
+        end
     end
+    
+    return config
 end
 
 -- ============================================
