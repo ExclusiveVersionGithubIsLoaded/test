@@ -66,7 +66,7 @@ local CONFIG = {
     -- Typography
     Fonts = {
         Main = Enum.Font.Code,
-        Bold = Enum.Font.CodeBold,
+        Bold = Enum.Font.SourceSansBold,
         Mono = Enum.Font.RobotoMono,
     },
     
